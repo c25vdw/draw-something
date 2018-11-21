@@ -19,3 +19,13 @@ we need:
         there will be no reference to my_server_handler, while it changes our game object stealthly.
         the only thing we do is drawing out the game object.
 """
+import random
+from server_handler import ServerHandler
+import pygame
+
+server_addr = ('localhost', pongserver.server.PongServer.DEFAULT_PORT)
+
+def main():
+    local_addr = ('localhost', random.randint(10000, 20000))
+    svh = ServerHandler(local_addr, server_addr, )
+    
