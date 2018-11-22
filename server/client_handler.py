@@ -49,8 +49,9 @@ class ClientHandler(socket.socket, threading.Thread):
         return None, None
 
     def update_with_client_update(self, client_update_json):
+        # TODO: add client guesser's upload
         if (self.canDraw):
             self.event_hub.cur_pos = client_update_json["cur_pos"]
             self.event_hub.color = client_update_json["color"]
         else:
-            print("...")
+            pass

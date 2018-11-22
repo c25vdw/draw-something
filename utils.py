@@ -11,7 +11,7 @@ def parse_drag_event(event, mouseDown, prevPos):
             print("mouse up")
     return mouseDown, prevPos
 
-def parse_keydown_for_eh(event, event_hub):
+def parse_input_event(event, event_hub):
     # event_hub: a EventHub instance for a client pygame.
     if event.key == pygame.K_RETURN:
         print("input: submitted answer\ninput: {}".format(event_hub.input_txt))
@@ -49,5 +49,6 @@ def update_cursors_from_mouseDown(mouseDown, prevPos, local_event_hub):
 def draw_input_from_eh(event_hub, screen, font):
     # draw a rect over
     # TODO: make it look nicer and put on the right.
+    
     txt_surface = font.render(event_hub.input_txt, True, NAVYBLUE)
     screen.blit(txt_surface, (WIDTH/2, HEIGHT/2))

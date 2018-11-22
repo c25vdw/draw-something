@@ -38,7 +38,7 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
         elif not svh.canDraw and event.type == pygame.KEYDOWN:
-            parse_keydown_for_eh(event, local_event_hub)
+            parse_input_event(event, local_event_hub)
         else:
             mouseDown, prevPos = parse_drag_event(event, mouseDown, prevPos)
 
