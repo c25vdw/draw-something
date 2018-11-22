@@ -33,7 +33,7 @@ class ServerHandler(socket.socket, threading.Thread):
     def run(self):
         self.connect()
         self.player_id = self.receive_player_id()
-
+        
         while True:
             game_update_json = self.receive_game_update_json()
             self.update_pygame_from_json(game_update_json)
@@ -72,7 +72,7 @@ class ServerHandler(socket.socket, threading.Thread):
     def update_pygame_from_json(self, data_dumped):
         data_json = json.loads(data_dumped)
 
-        print(data_json)
+        # print(data_json)
         print("updating pygame.")
 
         self.cur_pos = data_json["cur_pos"] # array(2)

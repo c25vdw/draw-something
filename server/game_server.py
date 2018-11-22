@@ -6,7 +6,6 @@ GameServer:
 """
 import sys
 sys.path.append('..')
-from draw_game.game import DrawGame
 from server.client_handler import ClientHandler
 from server.event_hub import EventHub
 import threading
@@ -55,9 +54,9 @@ class GameServer(threading.Thread, socket.socket):
             ch.start()
 
         print('Starting game.')
-        # clock = pygame.time.Clock()
-        # while True:
-        #     clock.tick(self.FPS)
+        clock = pygame.time.Clock()
+        while True:
+            clock.tick(self.FPS)
         return
 
     def wait_client(self):
@@ -83,6 +82,6 @@ def test_import():
     server = GameServer()
     print(server.event_hub.to_json())
 
-    server.run()
+    server.start()
 
 # test_import()
