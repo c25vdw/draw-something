@@ -10,7 +10,7 @@ from server.client_handler import ClientHandler
 from server.event_hub import EventHub
 import threading
 import socket
-import pygame
+import time
 
 
 class GameServer(threading.Thread, socket.socket):
@@ -19,7 +19,7 @@ class GameServer(threading.Thread, socket.socket):
     BUFFER_SIZE = 1024
     COMMAND_RATE = 60
     COMMAND_CLIENT_CONNECT = "client connect"
-    FPS = 60
+    FPS = 1
 
     def __init__(self, port=None):
         threading.Thread.__init__(self, name="Server thread")
@@ -54,9 +54,9 @@ class GameServer(threading.Thread, socket.socket):
             ch.start()
 
         print('Starting game.')
-        clock = pygame.time.Clock()
+        # clock = pygame.time.Clock()
         while True:
-            clock.tick(self.FPS)
+            time.sleep(1000)
         return
 
     def wait_client(self):
