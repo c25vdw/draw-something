@@ -1,73 +1,56 @@
 import random
 import pygame
+import time
 from server_handler import ServerHandler
+
 import sys
 sys.path.append('..')
 from server.event_hub import EventHub
+from settings import *
+from utils import *
 
-
-WIDTH = 300
-HEIGHT = 400
-BGCOLOR = (200, 200, 200)
-BLACK = (0, 0, 0)
-BRUSHWIDTH = 25
-BRUSHOFFSET = 1
-LINEWIDTH = BRUSHWIDTH - BRUSHOFFSET
-BRUSHRADIUS = int(BRUSHWIDTH/2-BRUSHOFFSET*4)
-
+# pygame initialization
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen.fill(BGCOLOR)
 pygame.display.set_caption("Draw Something!")
-
-
-server_addr = ('localhost', 12345)
 pygame.init()
+font = pygame.font.Font(None, 32)
+
+# svh init - communication with server
+server_addr = ('localhost', 12345)
 local_addr = ('localhost', random.randint(10000, 20000))
 local_event_hub = EventHub()
 svh = ServerHandler(local_addr, server_addr, local_event_hub)
 svh.start()
 
-FPS = 60
-clock = pygame.time.Clock()
+# state variables
 mouseDown = False
+prevPos = (None, None)
+
+# wait for server setup
+while svh.canDraw is None: time.sleep(0.1)
+
+# game start
+clock = pygame.time.Clock()
 while True:
-    if svh.canDraw is None:
-        continue
     clock.tick(FPS)
-    # Game loop part 1: Events #####
     for event in pygame.event.get():
-        # this one checks for the window being closed
         if event.type == pygame.QUIT:
             pygame.quit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouseDown = True
-            prevPos = pygame.mouse.get_pos()
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1:
-                mouseDown = False
-                print("mouse up")
-        # add any other events here (keys, mouse, etc.)
+        elif not svh.canDraw and event.type == pygame.KEYDOWN:
+            parse_keydown_for_eh(event, local_event_hub)
+        else:
+            mouseDown, prevPos = parse_drag_event(event, mouseDown, prevPos)
 
-    # Game loop part 2: Updates #####
-    # Game loop part 3: Draw #####
+    # just to make this shorter.
+    prevPos = update_cursors_from_mouseDown(mouseDown, prevPos, local_event_hub)
+    
+    # now cur_pos is syncd with server.
+    pos = svh.cur_pos # [(x, y), (prev_x, prev_y)]
 
-    if mouseDown:
-        (x, y) = pygame.mouse.get_pos()
-        data = [(x, y), prevPos]
-        local_event_hub.cur_pos = data
-        prevPos = (x, y)
-        print(data)
-    else:
-        # print(svh.cur_pos)
-        data = [(None, None), (None, None)]
-        local_event_hub.cur_pos = data
-
-    pos = svh.cur_pos
-
-    if pos != [[None, None], [None, None]]:
-
-        pygame.draw.line(screen, BLACK, pos[0], pos[1], LINEWIDTH)
-        pygame.draw.circle(screen, BLACK, pos[1], BRUSHRADIUS, 0)
-
+    # draw lines according to two points.
+    draw_the_drags_from_pos(pos, screen)
+    draw_input_from_eh(local_event_hub, screen, font)
     pygame.display.flip()
+
 pygame.quit()
