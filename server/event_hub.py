@@ -1,15 +1,16 @@
 import json
 
+
 class EventHub:
     def __init__(self):
-        self.cur_pos = (None, None)
+        self.cur_pos = [(None, None), (None, None)]
         self.color = (0, 0, 0)
         self.drawer_id = 1
         self.score = {
             'player_1': 0,
             'player_2': 0
         }
-    
+
     def to_json(self):
         return json.dumps({
             "cur_pos": [self.cur_pos[0], self.cur_pos[1]],
@@ -20,5 +21,3 @@ class EventHub:
                 "player_2": self.score["player_2"]
             }
         })
-    
-    
