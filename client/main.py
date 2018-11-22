@@ -20,12 +20,52 @@ we need:
         the only thing we do is drawing out the game object.
 """
 import random
-from server_handler import ServerHandler
 import pygame
+from server_handler import ServerHandler
 
-server_addr = ('localhost', pongserver.server.PongServer.DEFAULT_PORT)
+import sys
+sys.path.append('..')
+
+from server.event_hub import EventHub
+
+server_addr = ('localhost', 12345)
 
 def main():
-    local_addr = ('localhost', random.randint(10000, 20000))
-    svh = ServerHandler(local_addr, server_addr, )
+    pygame.init()
+    local_addr = ('localhost', random.randint(10000,20000))
+    local_event_hub = EventHub()
+    svh = ServerHandler(local_addr, server_addr, local_event_hub)
+    svh.start()
+
+    FPS = 20
+    clock = pygame.time.Clock()
+    while True:
+        clock.tick(FPS)
+        # Game loop part 1: Events #####
+        mouseDown = False
+        for event in pygame.event.get():
+            # this one checks for the window being closed
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouseDown = True
+                    prevPos = pygame.mouse.get_pos()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    mouseDown = False
+            # add any other events here (keys, mouse, etc.)
+
+        # Game loop part 2: Updates #####
+        # Game loop part 3: Draw #####
+
+        if mouseDown:
+            (x, y) = pygame.mouse.get_pos()
+            local_event_hub.cur_pos = [x, y]
+            pygame.draw.line(screen, BLACK, prevPos, (x, y), LINEWIDTH)
+            pygame.draw.circle(screen, BLACK, (x, y), BRUSHRADIUS, 0)
+            prevPos = (x, y)
+        pygame.display.flip()
+
     
+main()
