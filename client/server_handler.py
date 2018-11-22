@@ -49,7 +49,7 @@ class ServerHandler(socket.socket, threading.Thread):
             raise ValueError('Unable to receive game update from {}'.format(address))
         decoded_json = data.decode('utf-8')
 
-        print("decoded json: {} from server {}".format(decoded_json, address))
+        # print("decoded json: {} from server {}".format(decoded_json, address))
         return decoded_json
 
     
@@ -73,7 +73,7 @@ class ServerHandler(socket.socket, threading.Thread):
         data_json = json.loads(data_dumped)
 
         # print(data_json)
-        print("updating pygame.")
+        # print("updating pygame.")
 
         self.cur_pos = data_json["cur_pos"] # array(2)
         self.color = data_json["color"] # array(3)

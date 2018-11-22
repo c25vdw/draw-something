@@ -28,7 +28,6 @@ def main():
     FPS = 20
     clock = pygame.time.Clock()
     while True:
-        prevPos = (None, None)
         if svh.canDraw is None: continue
         clock.tick(FPS)
         # Game loop part 1: Events #####
@@ -37,10 +36,9 @@ def main():
             # this one checks for the window being closed
             if event.type == pygame.QUIT:
                 pygame.quit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and svh.canDraw:
                 if event.button == 1:
                     mouseDown = True
-                    prevPos = pygame.mouse.get_pos()
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     mouseDown = False
@@ -49,17 +47,15 @@ def main():
         # Game loop part 2: Updates #####
         # Game loop part 3: Draw #####
         x, y = 0, 0
-        if mouseDown and svh.canDraw:
+        if mouseDown:
             (x, y) = pygame.mouse.get_pos()
             local_event_hub.cur_pos = [x, y]
         else:
             # print(svh.cur_pos)
             x, y = svh.cur_pos
-        if not prevPos: prevPos = (x, y)
-        if prevPos is True: pygame.draw.line(screen, BLACK, prevPos, (x, y), LINEWIDTH)
-        if (x, y) is True:
-            print("drawing {}".format((x,y)))
-            pygame.draw.circle(screen, BLACK, (x, y), BRUSHRADIUS, 0)
+        if x is None and y is None: continue
+        
+        pygame.draw.circle(screen, BLACK, (x, y), BRUSHRADIUS, 0)
         pygame.display.flip()
 
     
