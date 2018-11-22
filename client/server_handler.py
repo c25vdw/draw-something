@@ -1,5 +1,6 @@
 import socket
 import threading
+from pygame.time import Clock
 import sys
 import json
 sys.path.append('..')
@@ -10,6 +11,7 @@ from server.game_server import GameServer
 class ServerHandler(socket.socket, threading.Thread):
 
     BUFFER_SIZE = 2048
+    FPS = 60
 
     def __init__(self, client_ip, server_ip, event_hub):
         # connection setup
@@ -36,7 +38,9 @@ class ServerHandler(socket.socket, threading.Thread):
         self.connect()
         self.player_id = self.receive_player_id()
 
+        clock = Clock()
         while True:
+            clock.tick(self.FPS)
             game_update_json = self.receive_game_update_json()
             self.update_pygame_from_json(game_update_json)
             self.send_client_update_json()
@@ -78,7 +82,7 @@ class ServerHandler(socket.socket, threading.Thread):
         # print(data_json)
         # print("updating pygame.")
 
-        self.cur_pos = data_json["cur_pos"]  # array(2)
+        self.cur_pos = data_json["cur_pos"]  # array(tuple(2), tuple(2))
         self.color = data_json["color"]  # array(3)
         self.drawer = data_json["drawer"]  # int
         # obj {"player_1": int, "player_2": int}

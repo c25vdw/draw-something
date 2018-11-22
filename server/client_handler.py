@@ -1,11 +1,11 @@
 import threading
 import socket
 import json
-
+from pygame.time import Clock
 
 class ClientHandler(socket.socket, threading.Thread):
     BUFFER_SIZE = 2048
-
+    FPS = 60
     def __init__(self, port, player_id, client_ip, event_hub):
         socket.socket.__init__(self, type=socket.SOCK_DGRAM)
         threading.Thread.__init__(self, name='ClientHandler')
@@ -25,7 +25,9 @@ class ClientHandler(socket.socket, threading.Thread):
         self.sendto(str(self.player_id).encode('utf-8'), self.client_ip)
 
     def run(self):
+        clock = Clock()
         while True:
+            clock.tick(self.FPS)
             self.send_update_to_client()
             cu, client_addr = self.receive_client_update()  # blocks
             self.update_with_client_update(cu)

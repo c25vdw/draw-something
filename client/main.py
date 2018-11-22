@@ -27,7 +27,7 @@ local_event_hub = EventHub()
 svh = ServerHandler(local_addr, server_addr, local_event_hub)
 svh.start()
 
-FPS = 20
+FPS = 60
 clock = pygame.time.Clock()
 mouseDown = False
 while True:
