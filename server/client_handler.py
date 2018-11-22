@@ -5,7 +5,7 @@ class ClientHandler(socket.socket, threading.Thread):
     def __init__(self, port, player_id, client_ip, event_hub):
         socket.socket.__init__(self, type=socket.SOCK_DGRAM)
         threading.Thread.__init__(self, name='ClientHandler')
-        self.settimeout(2)
+        self.settimeout(None)
         self.bind(('localhost', port))
         self.setDaemon(True)
 
@@ -26,7 +26,7 @@ class ClientHandler(socket.socket, threading.Thread):
             self.update_with_client_update(cu)
     
     def send_update_to_client(self):
-        self.sendto(self.event_hub.to_json().encode('utf-8'), self.client_address)
+        self.sendto(self.event_hub.to_json().encode('utf-8'), self.client_ip)
 
     def receive_client_update(self):
         data, addr = self.recvfrom(self.client_ip)

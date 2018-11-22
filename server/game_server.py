@@ -71,13 +71,18 @@ class GameServer(threading.Thread, socket.socket):
             # print('Client address found:', address_info)
             return addr
 
-    def create_client_handler(self, client_ip, client_id):
-        ch = ClientHandler(self.port + self.player_id, self.player_id, client_ip, self.event_hub)
+    def create_client_handler(self, client_ip, client_player_id):
+        ch = ClientHandler(self.port + client_player_id, client_player_id, client_ip, self.event_hub)
         self.client_handlers.append(ch)
-        self.player_addresses[client_id] = client_ip
+        self.player_addresses[client_player_id - 1] = client_ip
         
 
 
 def test_import():
     game = DrawGame()
     server = GameServer()
+    print(server.event_hub.to_json())
+
+    server.run()
+
+# test_import()
