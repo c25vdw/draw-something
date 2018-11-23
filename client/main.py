@@ -50,7 +50,7 @@ while True:
     # now cur_pos is syncd with server.
     pos = svh.cur_pos # [(x, y), (prev_x, prev_y)]
 
-    print(svh.canDraw)
+    # print(svh.client_answer)
     # draw lines according to two points.
     draw_the_drags_from_pos(pos, screen)
     draw_input_from_eh(local_event_hub, screen, font)

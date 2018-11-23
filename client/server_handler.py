@@ -83,14 +83,16 @@ class ServerHandler(socket.socket, threading.Thread):
         self.color = data_json["color"]  # array(3)
         self.drawer = data_json["drawer"]  # int
         # obj {"player_1": int, "player_2": int}
+
+        # we actually don't need this. draw right is decided by client handler.
         self.canDraw = (self.player_id == data_json["drawer"])
-        print(self.canDraw)
-        self.score = data_json["score"]
-        self.client_answer = data_json["client_answer"]
-        self.input_text = data_json["input_txt"]
-        self.correct = data_json["correct"]
+
+        self.score = data_json["score"] # later
+        self.client_answer = data_json["client_answer"] # later
+        self.input_text = data_json["input_txt"] # later
+        self.correct = data_json["correct"] # might needed for pause and more....
         
-        if self.correct:
+        if self.correct: # later
             self.client_answer = ""
             self.event_hub.client_answer = ""
 

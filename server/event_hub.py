@@ -11,13 +11,16 @@ class EventHub:
         self.input_txt = ""
         self.client_answer = ""
 
-        self.canDraw = None
         # server events
         self.score = {
             'player_1': 0,
             'player_2': 0
         }
         self.correct = False
+
+        # for server usage
+        self.answer = "dog"
+        self.pause_game = False # later
 
     def to_json(self):
         return json.dumps({
@@ -31,9 +34,16 @@ class EventHub:
             "input_txt": self.input_txt,
             "client_answer": self.client_answer,
             "correct": self.correct,
-            "canDraw": self.canDraw
         })
 
     def flush_input_to_client_answer(self):
         self.client_answer = self.input_txt
         self.input_txt = ""
+
+    def compare_then_update_answer(self, client_answer):
+        isCorrect = False
+        if (self.answer == client_answer):
+            isCorrect = True
+            self.answer = self.answer + "1"
+            print("server answer is now {}".format(self.answer))
+        return isCorrect

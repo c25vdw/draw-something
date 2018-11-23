@@ -19,9 +19,9 @@ class ClientHandler(socket.socket, threading.Thread):
         self.port = port
 
         self.canDraw = (self.player_id == self.event_hub.drawer_id)
-        self.generate_answer()
         self.send_client_player_id()
         self.cached_client_eh = None
+        self.oldCanDraw = self.canDraw
 
     def send_client_player_id(self):
         self.sendto(str(self.player_id).encode('utf-8'), self.client_ip)
@@ -51,13 +51,12 @@ class ClientHandler(socket.socket, threading.Thread):
         return None, None
 
     def generate_answer(self):
-        self.answer = "cat"
+        self.event_hub.answer = "cat"
         return 
 
     def update_with_client_update(self, client_update_json):
         if not self.canDraw:
             self.check_client_answer(self.event_hub.client_answer)
-        
         self.canDraw = (self.event_hub.drawer_id == self.player_id)
 
         # TODO: add client guesser's upload
@@ -71,20 +70,13 @@ class ClientHandler(socket.socket, threading.Thread):
         self.cached_client_eh = client_update_json
 
     def check_client_answer(self, ca):
-        if ca != self.answer or ca is None or len(ca) == 0:
-            return 
-        
-        if ca == self.answer and self.event_hub.correct is not True:
-            # print("correct answer")
-            self.event_hub.correct = True
+        if self.event_hub.compare_then_update_answer(ca):
+            print("player {}: correct answer".format(self.player_id))
             self.event_hub.client_answer = ""
 
             if self.event_hub.drawer_id == 1:
                 self.event_hub.drawer_id = 2
             else:
                 self.event_hub.drawer_id = 1
-            # print("drawer id: {}".format(self.event_hub.drawer_id))
-            # self.answer = None
-            # self.event_hub.score["player_{}".format(self.player_id)] += 1
 
             return

@@ -16,7 +16,7 @@ def parse_input_event(event, event_hub):
     if event.key == pygame.K_RETURN:
         print("input: submitted answer\ninput: {}".format(event_hub.input_txt))
         event_hub.flush_input_to_client_answer()
-        print("input: now input is {}, answer is {}".format(
+        print("input: input cleared, your answer is {}".format(
             event_hub.input_txt, event_hub.client_answer))
     elif event.key == pygame.K_BACKSPACE:
         print("input: backspace.\ninput: {}".format(event_hub.input_txt))
