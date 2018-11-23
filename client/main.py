@@ -32,6 +32,7 @@ while svh.canDraw is None: time.sleep(0.1)
 
 # game start
 clock = pygame.time.Clock()
+once = True
 while True:
     clock.tick(FPS)
     for event in pygame.event.get():
@@ -44,10 +45,12 @@ while True:
 
     # just to make this shorter.
     prevPos = update_cursors_from_mouseDown(mouseDown, prevPos, local_event_hub)
+    # print(svh.correct, svh.score, svh.input_text)
     
     # now cur_pos is syncd with server.
     pos = svh.cur_pos # [(x, y), (prev_x, prev_y)]
 
+    print(svh.canDraw)
     # draw lines according to two points.
     draw_the_drags_from_pos(pos, screen)
     draw_input_from_eh(local_event_hub, screen, font)

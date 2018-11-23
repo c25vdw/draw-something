@@ -3,15 +3,21 @@ import json
 
 class EventHub:
     def __init__(self):
+
+        # local events
         self.cur_pos = [(None, None), (None, None)]
         self.color = (0, 0, 0)
         self.drawer_id = 1
+        self.input_txt = ""
+        self.client_answer = ""
+
+        self.canDraw = None
+        # server events
         self.score = {
             'player_1': 0,
             'player_2': 0
         }
-        self.input_txt = ""
-        self.client_answer = ""
+        self.correct = False
 
     def to_json(self):
         return json.dumps({
@@ -22,7 +28,10 @@ class EventHub:
                 "player_1": self.score["player_1"],
                 "player_2": self.score["player_2"]
             },
-            "client_answer": ""
+            "input_txt": self.input_txt,
+            "client_answer": self.client_answer,
+            "correct": self.correct,
+            "canDraw": self.canDraw
         })
 
     def flush_input_to_client_answer(self):
