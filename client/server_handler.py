@@ -42,7 +42,7 @@ class ServerHandler(socket.socket, threading.Thread):
         while True:
             clock.tick(self.FPS)
             game_update_json = self.receive_game_update_json()
-            self.update_pygame_from_json(game_update_json)
+            self.update_self_attr_from_json(game_update_json)
             self.send_client_update_json()
 
     def connect(self):
@@ -76,19 +76,25 @@ class ServerHandler(socket.socket, threading.Thread):
 
         return player_id
 
-    def update_pygame_from_json(self, data_dumped):
+    def update_self_attr_from_json(self, data_dumped):
         data_json = json.loads(data_dumped)
-
-        # print(data_json)
-        # print("updating pygame.")
 
         self.cur_pos = data_json["cur_pos"]  # array(tuple(2), tuple(2))
         self.color = data_json["color"]  # array(3)
         self.drawer = data_json["drawer"]  # int
         # obj {"player_1": int, "player_2": int}
-        self.score = data_json["score"]
 
-        self.canDraw = (self.player_id == self.drawer)
+        # we actually don't need this. draw right is decided by client handler.
+        self.canDraw = (self.player_id == data_json["drawer"])
+
+        self.score = data_json["score"] # later
+        self.client_answer = data_json["client_answer"] # later
+        self.input_text = data_json["input_txt"] # later
+        self.correct = data_json["correct"] # might needed for pause and more....
+        
+        if self.correct: # later
+            self.client_answer = ""
+            self.event_hub.client_answer = ""
 
     def send_client_update_json(self):
         self.sendto(self.event_hub.to_json().encode('utf-8'), self.server_ip)

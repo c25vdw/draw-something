@@ -4,14 +4,15 @@ GameServer:
 
     draw_game: the game object, passed to its two client handlers so that it gets modified.
 """
+# bulit-in packages
+import threading
+import socket
+import time
+# local packages
 import sys
 sys.path.append('..')
 from server.client_handler import ClientHandler
 from server.event_hub import EventHub
-import threading
-import socket
-import time
-
 
 class GameServer(threading.Thread, socket.socket):
     TIMEOUT = 2.0

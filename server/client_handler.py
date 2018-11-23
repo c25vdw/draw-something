@@ -2,7 +2,7 @@ import threading
 import socket
 import json
 from pygame.time import Clock
-
+import random
 class ClientHandler(socket.socket, threading.Thread):
     BUFFER_SIZE = 2048
     FPS = 60
@@ -20,6 +20,8 @@ class ClientHandler(socket.socket, threading.Thread):
 
         self.canDraw = (self.player_id == self.event_hub.drawer_id)
         self.send_client_player_id()
+        self.cached_client_eh = None
+        self.oldCanDraw = self.canDraw
 
     def send_client_player_id(self):
         self.sendto(str(self.player_id).encode('utf-8'), self.client_ip)
@@ -48,9 +50,33 @@ class ClientHandler(socket.socket, threading.Thread):
             return cu, addr
         return None, None
 
+    def generate_answer(self):
+        self.event_hub.answer = "cat"
+        return 
+
     def update_with_client_update(self, client_update_json):
+        if not self.canDraw:
+            self.check_client_answer(self.event_hub.client_answer)
+        self.canDraw = (self.event_hub.drawer_id == self.player_id)
+
+        # TODO: add client guesser's upload
         if (self.canDraw):
             self.event_hub.cur_pos = client_update_json["cur_pos"]
             self.event_hub.color = client_update_json["color"]
         else:
-            print("...")
+            self.event_hub.input_txt = client_update_json["input_txt"]
+            self.event_hub.client_answer = client_update_json["client_answer"]
+            
+        self.cached_client_eh = client_update_json
+
+    def check_client_answer(self, ca):
+        if self.event_hub.compare_then_update_answer(ca):
+            print("player {}: correct answer".format(self.player_id))
+            self.event_hub.client_answer = ""
+
+            if self.event_hub.drawer_id == 1:
+                self.event_hub.drawer_id = 2
+            else:
+                self.event_hub.drawer_id = 1
+
+            return
