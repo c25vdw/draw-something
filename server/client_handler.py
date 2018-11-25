@@ -50,10 +50,6 @@ class ClientHandler(socket.socket, threading.Thread):
             return cu, addr
         return None, None
 
-    def generate_answer(self):
-        self.event_hub.answer = "cat"
-        return 
-
     def update_with_client_update(self, client_update_json):
         if not self.canDraw:
             self.check_client_answer(self.event_hub.client_answer)
