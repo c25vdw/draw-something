@@ -39,10 +39,13 @@ class ClientHandler(socket.socket, threading.Thread):
         while True:
             # clock.tick(self.FPS)
             if self.event_hub.prev_upload_id != self.player_id:
-                self.send_update_to_client()
-                cu, client_addr = self.receive_client_update()  # blocks
-                self.update_with_client_update(cu)
-                self.event_hub.prev_upload_id = self.player_id
+                try:
+                    self.send_update_to_client()
+                    cu, client_addr = self.receive_client_update()  # blocks
+                    self.update_with_client_update(cu)
+                    self.event_hub.prev_upload_id = self.player_id
+                except socket.timeout:
+                    print("client handler {} timed out.".format(self.player_id))
 
     def send_update_to_client(self):
         print("sending to client: {}".format(self.client_ip))
@@ -67,12 +70,12 @@ class ClientHandler(socket.socket, threading.Thread):
         self.canDraw = (self.event_hub.drawer_id == self.player_id)
 
         # TODO: add client guesser's upload
-        # if (self.canDraw):
-        self.event_hub.cur_pos = client_update_json["cur_pos"]
-        self.event_hub.color = client_update_json["color"]
-        # else:
-        self.event_hub.input_txt = client_update_json["input_txt"]
-        self.event_hub.client_answer = client_update_json["client_answer"]
+        if (self.canDraw):
+            self.event_hub.cur_pos = client_update_json["cur_pos"]
+            # self.event_hub.color = client_update_json["color"]
+        else:
+            self.event_hub.input_txt = client_update_json["input_txt"]
+            self.event_hub.client_answer = client_update_json["client_answer"]
             
         self.cached_client_eh = client_update_json
 

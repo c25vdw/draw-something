@@ -31,7 +31,7 @@ class GameServer(threading.Thread, socket.socket):
     def __init__(self, port=None):
         threading.Thread.__init__(self, name="Server thread")
         socket.socket.__init__(self, type=socket.SOCK_DGRAM)
-
+        self.setblocking(True)
         self.port = self.DEFAULT_PORT if port is None else port
         self.ip_addr = get_ip_address()
         self.bind((self.ip_addr, self.port))
