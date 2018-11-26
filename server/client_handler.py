@@ -3,6 +3,13 @@ import socket
 import json
 from pygame.time import Clock
 import random
+
+def get_ip_address():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip_addr = s.getsockname()[0]
+    return ip_addr
+
 class ClientHandler(socket.socket, threading.Thread):
     BUFFER_SIZE = 2048
     FPS = 60
@@ -10,7 +17,7 @@ class ClientHandler(socket.socket, threading.Thread):
         socket.socket.__init__(self, type=socket.SOCK_DGRAM)
         threading.Thread.__init__(self, name='ClientHandler')
         self.settimeout(None)
-        self.bind(('localhost', port))
+        self.bind((get_ip_address(), port))
         self.setDaemon(True)
 
         self.player_id = player_id
@@ -35,6 +42,7 @@ class ClientHandler(socket.socket, threading.Thread):
             self.update_with_client_update(cu)
 
     def send_update_to_client(self):
+        print("sending to client: {}".format(self.client_ip))
         self.sendto(self.event_hub.to_json().encode('utf-8'), self.client_ip)
 
     def receive_client_update(self):
