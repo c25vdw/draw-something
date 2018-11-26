@@ -35,20 +35,21 @@ class ClientHandler(socket.socket, threading.Thread):
         self.sendto(str(self.player_id).encode('utf-8'), self.client_ip)
 
     def run(self):
-        # clock = Clock()
+        clock = Clock()
         while True:
-            # clock.tick(self.FPS)
+            clock.tick(self.FPS)
             if self.event_hub.prev_upload_id != self.player_id:
                 try:
                     self.send_update_to_client()
                     cu, client_addr = self.receive_client_update()  # blocks
                     self.update_with_client_update(cu)
                     self.event_hub.prev_upload_id = self.player_id
-                except socket.timeout:
+                except:
                     print("client handler {} timed out.".format(self.player_id))
+        
 
     def send_update_to_client(self):
-        print("sending to client: {}".format(self.client_ip))
+        # print("sending to client: {}".format(self.client_ip))
         self.sendto(self.event_hub.to_json().encode('utf-8'), self.client_ip)
 
     def receive_client_update(self):

@@ -11,13 +11,13 @@ from server.game_server import GameServer
 class ServerHandler(socket.socket, threading.Thread):
 
     BUFFER_SIZE = 2048
-    FPS = 10
+    FPS = 60
 
     def __init__(self, client_ip, server_ip, event_hub):
         # connection setup
         socket.socket.__init__(self, type=socket.SOCK_DGRAM)
         threading.Thread.__init__(self)
-        self.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        # self.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         self.settimeout(None)
         self.setDaemon(True)
         self.bind(client_ip)
@@ -39,15 +39,17 @@ class ServerHandler(socket.socket, threading.Thread):
         self.connect()
         self.player_id = self.receive_player_id()
 
-        # clock = Clock()
+        clock = Clock()
         while True:
-            # clock.tick(self.FPS)
+            clock.tick(self.FPS)
             try:
+                self.send_client_update_json()
                 game_update_json = self.receive_game_update_json()
                 self.update_self_attr_from_json(game_update_json)
                 self.send_client_update_json()
-            except socket.timeout:
+            except:
                 print("server handler {} timed out.".format(self.player_id))
+        print("server handler ends")
 
     def connect(self):
         self.sendto(GameServer.COMMAND_CLIENT_CONNECT.encode(
@@ -55,11 +57,16 @@ class ServerHandler(socket.socket, threading.Thread):
         return
 
     def receive_game_update_json(self):
-        data, address = self.recvfrom(self.BUFFER_SIZE)
+        # print("receive: 1. receiving update from server")
+        try:
+            data, address = self.recvfrom(self.BUFFER_SIZE)
+        except:
+            print("receive: error receiving")
+        # print("receive: 2. finish receiving update.")
         if data is None:
             raise ValueError(
                 'Unable to receive game update from {}'.format(address))
-        print("receiving from server: {}".format(data.decode('utf-8')))
+        # print("receiving from server: {}".format(data.decode('utf-8')))
         decoded_json = data.decode('utf-8')
 
         # print("decoded json: {} from server {}".format(decoded_json, address))
@@ -102,5 +109,10 @@ class ServerHandler(socket.socket, threading.Thread):
             self.event_hub.client_answer = ""
 
     def send_client_update_json(self):
-        self.sendto(self.event_hub.to_json().encode('utf-8'), self.server_ip)
+        # print("send: 1. sending client update to server")
+        try:
+            self.sendto(self.event_hub.to_json().encode('utf-8'), self.server_ip)
+        except:
+            print("sending update to server failed")
+        # print("send: 2. end sending update...")
         return
