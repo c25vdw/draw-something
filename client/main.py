@@ -18,7 +18,7 @@ pygame.init()
 font = pygame.font.Font(None, 32)
 
 # svh init - communication with server
-server_addr = ("10.0.0.172", 12345) # need to get server from user input
+server_addr = (input("server ip: "), 12345) # need to get server from user input
 local_addr = (get_ip_address(), random.randint(10000, 20000))
 
 local_event_hub = EventHub()
