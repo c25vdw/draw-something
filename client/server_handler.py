@@ -14,12 +14,9 @@ class ServerHandler(socket.socket, threading.Thread):
 
     def __init__(self, client_ip, server_ip, event_hub):
         # connection setup
-        socket.socket.__init__(self, type=socket.SOCK_DGRAM)
+        socket.socket.__init__(self)
         threading.Thread.__init__(self)
         # self.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        self.settimeout(None)
-        self.setDaemon(True)
-        self.bind(client_ip)
         self.server_ip = server_ip
 
         # local client handler vars
@@ -36,8 +33,14 @@ class ServerHandler(socket.socket, threading.Thread):
 
     def run(self):
         self.connect()
+        ch_sock, ch_addr = self.accept()
         self.player_id = self.receive_player_id()
 
+        self.sock = ch_sock
+        self.sock.settimeout(None)
+        self.sock.setDaemon(True)
+        self.sock.bind(client_ip)
+        self.server_ip = ch_addr
         # clock = Clock()
         while True:
             # clock.tick(self.FPS)
@@ -68,13 +71,13 @@ class ServerHandler(socket.socket, threading.Thread):
                 'Unable to receive game update from {}'.format(address))
         # print("receiving from server: {}".format(data.decode('utf-8')))
         decoded_json = data.decode('utf-8')
-        self.sendto(GameServer.COMMAND_CLIENT_RECEIVED_UPDATE.encode(
-            'utf-8'), self.server_ip)
+        self.sock.sendall(GameServer.COMMAND_CLIENT_RECEIVED_UPDATE.encode(
+            'utf-8'))
         # print("decoded json: {} from server {}".format(decoded_json, address))
         return decoded_json
 
     def receive_player_id(self):
-        data, address = self.recvfrom(self.BUFFER_SIZE)
+        data = self.recv(self.BUFFER_SIZE)
         if data is None:
             return -1
         decoded = data.decode('utf-8')
@@ -85,8 +88,6 @@ class ServerHandler(socket.socket, threading.Thread):
             raise ValueError(err + ' Should have received an integer!')
 
         # OVERWRITE self.server_address to the one received, since that will be address of the client handler
-        self.server_ip = address
-
         return player_id
 
     def update_self_attr_from_json(self, data_dumped):

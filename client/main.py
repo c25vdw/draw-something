@@ -1,7 +1,7 @@
 import random
 import pygame
 import time
-from server_handler import ServerHandler
+from sh import ServerHandlerG as ServerHandler
 
 import sys
 sys.path.append('..')
@@ -18,11 +18,11 @@ pygame.init()
 font = pygame.font.Font(None, 32)
 
 # svh init - communication with server
-server_addr = (input("your server's ip address: "), 12345) # need to get server from user input
+server_addr = ("10.0.0.172", 12345) # need to get server from user input
 local_addr = (get_ip_address(), random.randint(10000, 20000))
 
 local_event_hub = EventHub()
-svh = ServerHandler(local_addr, server_addr, local_event_hub)
+svh = ServerHandler(local_event_hub, local_addr, server_addr)
 svh.start()
 
 # state variables
@@ -36,6 +36,7 @@ while svh.canDraw is None: time.sleep(0.1)
 clock = pygame.time.Clock()
 once = True
 while True:
+    # print("in game loop")
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

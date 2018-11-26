@@ -17,8 +17,9 @@ class ClientHandler(socket.socket, threading.Thread):
     BUFFER_SIZE = 2048
     FPS = 10
     def __init__(self, port, player_id, client_ip, event_hub):
-        socket.socket.__init__(self, type=socket.SOCK_DGRAM)
+        socket.create_connection(client_ip, timeout=None).__init__(self)
         threading.Thread.__init__(self, name='ClientHandler')
+        
         # self._exc_info()
         self.settimeout(None)
         self.bind((get_ip_address(), port))
@@ -33,15 +34,16 @@ class ClientHandler(socket.socket, threading.Thread):
         self.send_client_player_id()
         self.cached_client_eh = None
         self.oldCanDraw = self.canDraw
-
+        
     def send_client_player_id(self):
         self.sendto(str(self.player_id).encode('utf-8'), self.client_ip)
 
     def run(self):
+
         # clock = Clock()
         while True:
             # clock.tick(self.FPS)
-            if self.event_hub.prev_upload_id != self.player_id:
+            # if self.event_hub.prev_upload_id != self.player_id:
                 try:
                     self.send_update_to_client()
                     self.wait_client()
