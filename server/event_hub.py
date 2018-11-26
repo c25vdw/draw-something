@@ -21,6 +21,7 @@ class EventHub:
         # for server usage
         self.answer = "dog"
         self.pause_game = False # later
+        self.prev_upload_id = self.drawer_id
 
     def to_json(self):
         return json.dumps({

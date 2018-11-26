@@ -11,12 +11,13 @@ from server.game_server import GameServer
 class ServerHandler(socket.socket, threading.Thread):
 
     BUFFER_SIZE = 2048
-    FPS = 60
+    FPS = 10
 
     def __init__(self, client_ip, server_ip, event_hub):
         # connection setup
         socket.socket.__init__(self, type=socket.SOCK_DGRAM)
         threading.Thread.__init__(self)
+        self.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         self.settimeout(None)
         self.setDaemon(True)
         self.bind(client_ip)
@@ -55,6 +56,7 @@ class ServerHandler(socket.socket, threading.Thread):
         if data is None:
             raise ValueError(
                 'Unable to receive game update from {}'.format(address))
+        print("receiving from server: {}".format(data.decode('utf-8')))
         decoded_json = data.decode('utf-8')
 
         # print("decoded json: {} from server {}".format(decoded_json, address))
@@ -78,7 +80,7 @@ class ServerHandler(socket.socket, threading.Thread):
 
     def update_self_attr_from_json(self, data_dumped):
         data_json = json.loads(data_dumped)
-
+        # print(data_json["cur_pos"])
         self.cur_pos = data_json["cur_pos"]  # array(tuple(2), tuple(2))
         self.color = data_json["color"]  # array(3)
         self.drawer = data_json["drawer"]  # int
