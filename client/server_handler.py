@@ -39,12 +39,15 @@ class ServerHandler(socket.socket, threading.Thread):
         self.connect()
         self.player_id = self.receive_player_id()
 
-        clock = Clock()
+        # clock = Clock()
         while True:
-            clock.tick(self.FPS)
-            game_update_json = self.receive_game_update_json()
-            self.update_self_attr_from_json(game_update_json)
-            self.send_client_update_json()
+            # clock.tick(self.FPS)
+            try:
+                game_update_json = self.receive_game_update_json()
+                self.update_self_attr_from_json(game_update_json)
+                self.send_client_update_json()
+            except socket.timeout:
+                print("server handler {} timed out.".format(self.player_id))
 
     def connect(self):
         self.sendto(GameServer.COMMAND_CLIENT_CONNECT.encode(
