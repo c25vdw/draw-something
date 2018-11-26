@@ -27,7 +27,10 @@ def parse_input_event(event, event_hub):
 
 
 def draw_the_drags_from_pos(pos, screen):
+    if not pos:
+        pos = [[0,0], [0,0]]
     # pos: [(x, y), (prev_x, prev_y)]
+    # print(pos)
     if pos != [[None, None], [None, None]]:
         pygame.draw.line(screen, BLACK, pos[0], pos[1], LINEWIDTH)
         pygame.draw.circle(screen, BLACK, pos[1], BRUSHRADIUS, 0)

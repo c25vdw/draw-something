@@ -3,14 +3,26 @@ import socket
 import json
 from pygame.time import Clock
 import random
+import sys
+
+COMMAND_CLIENT_CONNECT = "client connect"
+COMMAND_CLIENT_RECEIVED_UPDATE = "client received update"
+def get_ip_address():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip_addr = s.getsockname()[0]
+    return ip_addr
+
 class ClientHandler(socket.socket, threading.Thread):
     BUFFER_SIZE = 2048
-    FPS = 60
+    FPS = 10
     def __init__(self, port, player_id, client_ip, event_hub):
-        socket.socket.__init__(self, type=socket.SOCK_DGRAM)
+        socket.create_connection(client_ip, timeout=None).__init__(self)
         threading.Thread.__init__(self, name='ClientHandler')
+        
+        # self._exc_info()
         self.settimeout(None)
-        self.bind(('localhost', port))
+        self.bind((get_ip_address(), port))
         self.setDaemon(True)
 
         self.player_id = player_id
@@ -22,22 +34,42 @@ class ClientHandler(socket.socket, threading.Thread):
         self.send_client_player_id()
         self.cached_client_eh = None
         self.oldCanDraw = self.canDraw
-
+        
     def send_client_player_id(self):
         self.sendto(str(self.player_id).encode('utf-8'), self.client_ip)
 
     def run(self):
-        clock = Clock()
+
+        # clock = Clock()
         while True:
-            clock.tick(self.FPS)
-            self.send_update_to_client()
-            cu, client_addr = self.receive_client_update()  # blocks
-            self.update_with_client_update(cu)
+            # clock.tick(self.FPS)
+            # if self.event_hub.prev_upload_id != self.player_id:
+                try:
+                    self.send_update_to_client()
+                    self.wait_client()
+                    cu, client_addr = self.receive_client_update()  # blocks
+                    self.event_hub.prev_upload_id = self.player_id
+                    self.update_with_client_update(cu)
+                    
+                except:
+                    print("client handler {} timed out.".format(self.player_id))
+        
+    def wait_client(self):
+        data, addr = self.recvfrom(self.BUFFER_SIZE)
+        print('data:', data, 'address_info:', addr)
+        if data:
+            decoded = data.decode('utf-8')
+            if decoded != COMMAND_CLIENT_RECEIVED_UPDATE:
+                raise ValueError('Expecting "{}", but got "{}"'.format(COMMAND_CLIENT_RECEIVED_UPDATE, decoded))
+            # print('Client address found:',W address_info)
+            return addr
 
     def send_update_to_client(self):
+        # print("sending to client: {}".format(self.client_ip))
         self.sendto(self.event_hub.to_json().encode('utf-8'), self.client_ip)
 
     def receive_client_update(self):
+        self.sendto("ok to update".encode('utf-8'), self.client_ip)
         data, addr = self.recvfrom(self.BUFFER_SIZE)
         if data:
             decoded = data.decode('utf-8')
@@ -50,10 +82,6 @@ class ClientHandler(socket.socket, threading.Thread):
             return cu, addr
         return None, None
 
-    def generate_answer(self):
-        self.event_hub.answer = "cat"
-        return 
-
     def update_with_client_update(self, client_update_json):
         if not self.canDraw:
             self.check_client_answer(self.event_hub.client_answer)
@@ -62,7 +90,7 @@ class ClientHandler(socket.socket, threading.Thread):
         # TODO: add client guesser's upload
         if (self.canDraw):
             self.event_hub.cur_pos = client_update_json["cur_pos"]
-            self.event_hub.color = client_update_json["color"]
+            # self.event_hub.color = client_update_json["color"]
         else:
             self.event_hub.input_txt = client_update_json["input_txt"]
             self.event_hub.client_answer = client_update_json["client_answer"]

@@ -14,20 +14,28 @@ sys.path.append('..')
 from server.client_handler import ClientHandler
 from server.event_hub import EventHub
 
+def get_ip_address():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip_addr = s.getsockname()[0]
+    return ip_addr
+
 class GameServer(threading.Thread, socket.socket):
     TIMEOUT = 2.0
     DEFAULT_PORT = 12345
     BUFFER_SIZE = 1024
     COMMAND_RATE = 60
     COMMAND_CLIENT_CONNECT = "client connect"
+    COMMAND_CLIENT_RECEIVED_UPDATE = "client received update"
     FPS = 1
 
     def __init__(self, port=None):
         threading.Thread.__init__(self, name="Server thread")
         socket.socket.__init__(self, type=socket.SOCK_DGRAM)
-
+        self.setblocking(True)
         self.port = self.DEFAULT_PORT if port is None else port
-        self.bind(('localhost', self.port))
+        self.ip_addr = get_ip_address()
+        self.bind((self.ip_addr, self.port))
         self.clients = []
         self.client_handlers = []
         self.player_addresses = {}
@@ -36,7 +44,7 @@ class GameServer(threading.Thread, socket.socket):
         self.event_hub = EventHub()
     
     def run(self):
-        print('Hosting at:', self.getsockname())
+        print('###DEBUG Hosting at:', self.getsockname())
 
         print('Starting server.')
 
@@ -45,10 +53,10 @@ class GameServer(threading.Thread, socket.socket):
 
             print('Waiting for client #{}'.format(player_id))
             c = self.wait_client()
-            print("client {} connected, ip: {}".format(player_id, c))
+            print("###DEBUG client {} connected, ip: {}".format(player_id, c))
             self.clients.append(c)
 
-            print('Initializing client handler id: {} to addr: {}'.format(player_id, c))
+            print('###DEBUG Initializing client handler id: {} to addr: {}'.format(player_id, c))
             self.create_client_handler(c, player_id)
 
         for ch in self.client_handlers:
@@ -79,10 +87,11 @@ class GameServer(threading.Thread, socket.socket):
 
 
 def test_import():
-    game = DrawGame()
-    server = GameServer()
-    print(server.event_hub.to_json())
+    # game = DrawGame()
+    # server = GameServer()
+    # print(server.event_hub.to_json())
 
-    server.start()
+    # server.start()
+    getServerIP()
 
 # test_import()
