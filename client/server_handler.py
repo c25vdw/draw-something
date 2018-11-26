@@ -4,7 +4,6 @@ from pygame.time import Clock
 import sys
 import json
 sys.path.append('..')
-
 from server.game_server import GameServer
 
 
@@ -39,13 +38,14 @@ class ServerHandler(socket.socket, threading.Thread):
         self.connect()
         self.player_id = self.receive_player_id()
 
-        clock = Clock()
+        # clock = Clock()
         while True:
-            clock.tick(self.FPS)
+            # clock.tick(self.FPS)
             try:
-                self.send_client_update_json()
+                # self.send_client_update_json()
                 game_update_json = self.receive_game_update_json()
                 self.update_self_attr_from_json(game_update_json)
+                self.wait_server()
                 self.send_client_update_json()
             except:
                 print("server handler {} timed out.".format(self.player_id))
@@ -68,7 +68,8 @@ class ServerHandler(socket.socket, threading.Thread):
                 'Unable to receive game update from {}'.format(address))
         # print("receiving from server: {}".format(data.decode('utf-8')))
         decoded_json = data.decode('utf-8')
-
+        self.sendto(GameServer.COMMAND_CLIENT_RECEIVED_UPDATE.encode(
+            'utf-8'), self.server_ip)
         # print("decoded json: {} from server {}".format(decoded_json, address))
         return decoded_json
 
@@ -108,8 +109,18 @@ class ServerHandler(socket.socket, threading.Thread):
             self.client_answer = ""
             self.event_hub.client_answer = ""
 
+    def wait_server(self):
+        data, addr = self.recvfrom(self.BUFFER_SIZE)
+        print('data:', data, 'address_info:', addr)
+        if data:
+            decoded = data.decode('utf-8')
+            if decoded != "ok to update":
+                raise ValueError('Expecting "{}", but got "{}"'.format("ok to update", decoded))
+            # print('Client address found:',W address_info)
+            return addr
     def send_client_update_json(self):
         # print("send: 1. sending client update to server")
+
         try:
             self.sendto(self.event_hub.to_json().encode('utf-8'), self.server_ip)
         except:

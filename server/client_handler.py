@@ -3,7 +3,10 @@ import socket
 import json
 from pygame.time import Clock
 import random
+import sys
 
+COMMAND_CLIENT_CONNECT = "client connect"
+COMMAND_CLIENT_RECEIVED_UPDATE = "client received update"
 def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
@@ -35,24 +38,36 @@ class ClientHandler(socket.socket, threading.Thread):
         self.sendto(str(self.player_id).encode('utf-8'), self.client_ip)
 
     def run(self):
-        clock = Clock()
+        # clock = Clock()
         while True:
-            clock.tick(self.FPS)
+            # clock.tick(self.FPS)
             if self.event_hub.prev_upload_id != self.player_id:
                 try:
                     self.send_update_to_client()
+                    self.wait_client()
                     cu, client_addr = self.receive_client_update()  # blocks
-                    self.update_with_client_update(cu)
                     self.event_hub.prev_upload_id = self.player_id
+                    self.update_with_client_update(cu)
+                    
                 except:
                     print("client handler {} timed out.".format(self.player_id))
         
+    def wait_client(self):
+        data, addr = self.recvfrom(self.BUFFER_SIZE)
+        print('data:', data, 'address_info:', addr)
+        if data:
+            decoded = data.decode('utf-8')
+            if decoded != COMMAND_CLIENT_RECEIVED_UPDATE:
+                raise ValueError('Expecting "{}", but got "{}"'.format(COMMAND_CLIENT_RECEIVED_UPDATE, decoded))
+            # print('Client address found:',W address_info)
+            return addr
 
     def send_update_to_client(self):
         # print("sending to client: {}".format(self.client_ip))
         self.sendto(self.event_hub.to_json().encode('utf-8'), self.client_ip)
 
     def receive_client_update(self):
+        self.sendto("ok to update".encode('utf-8'), self.client_ip)
         data, addr = self.recvfrom(self.BUFFER_SIZE)
         if data:
             decoded = data.decode('utf-8')

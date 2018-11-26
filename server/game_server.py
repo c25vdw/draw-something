@@ -26,6 +26,7 @@ class GameServer(threading.Thread, socket.socket):
     BUFFER_SIZE = 1024
     COMMAND_RATE = 60
     COMMAND_CLIENT_CONNECT = "client connect"
+    COMMAND_CLIENT_RECEIVED_UPDATE = "client received update"
     FPS = 1
 
     def __init__(self, port=None):
