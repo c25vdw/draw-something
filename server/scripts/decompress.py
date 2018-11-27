@@ -13,7 +13,6 @@ def run_decompressor (compressed, decompress_to):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: {} <file1> <file2> ...".format(sys.argv[0]))
+        print("Usage: {} <huffman filename> <plain filename> ...".format(sys.argv[0]))
     else:
-        for filename in sys.argv[1:]:
-            run_decompressor(filename, "hello")
+        run_decompressor(sys.argv[1], sys.argv[2])
