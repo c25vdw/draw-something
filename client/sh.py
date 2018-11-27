@@ -91,7 +91,6 @@ class ServerHandlerG(threading.Thread):
                 self.client_answer = server_eh["client_answer"] # later
                 
                 self.input_txt = server_eh["input_txt"] # later
-            
-            print(self.input_txt)
+            print("drawer id: ", server_eh["drawer"], ". self id: ", self.player_id)
             self.sock.sendall(self.eh.to_json().encode('utf-8'))
 

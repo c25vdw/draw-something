@@ -49,9 +49,9 @@ def update_cursors_from_mouseDown(mouseDown, prevPos, local_event_hub):
     # some instant between this, server will be syncd, by svh.
     return prevPos
 
-def draw_input_from_eh(event_hub, screen, font):
+def draw_input_from_eh(input_txt, screen, font):
     # draw a rect over
     # TODO: make it look nicer and put on the right.
     screen.blit(font.render("", True, NAVYBLUE), (WIDTH/2, HEIGHT/2))
-    txt_surface = font.render(event_hub.input_txt, True, NAVYBLUE)
+    txt_surface = font.render(input_txt, True, NAVYBLUE)
     screen.blit(txt_surface, (WIDTH/2, HEIGHT/2))

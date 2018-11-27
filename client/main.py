@@ -18,7 +18,7 @@ pygame.init()
 font = pygame.font.Font(None, 32)
 
 # svh init - communication with server
-server_addr = (input("server ip: "), 12345) # need to get server from user input
+server_addr = ("10.0.0.172", 12345) # need to get server from user input
 local_addr = (get_ip_address(), random.randint(10000, 20000))
 
 local_event_hub = EventHub()
@@ -52,11 +52,11 @@ while True:
     
     # now cur_pos is syncd with server.
     pos = svh.cur_pos # [(x, y), (prev_x, prev_y)]
-
+    input_txt = svh.input_txt
     # print(svh.client_answer)
     # draw lines according to two points.
     draw_the_drags_from_pos(pos, screen)
-    draw_input_from_eh(local_event_hub, screen, font)
+    draw_input_from_eh(input_txt, screen, font)
     pygame.display.flip()
 
 pygame.quit()
