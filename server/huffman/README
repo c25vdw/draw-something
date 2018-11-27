@@ -1,0 +1,20 @@
+Name: Lucas Zeng
+ID #: 1539168
+CMPUT 274 FALL, 2018
+
+Notice:
+    this part of code, under the folder 'huffman', is created by Lucas Zeng, for CMPUT274 Fall, assignment 1.
+    It is now modified to be applied into this project.
+
+Assignment 1: Huffman Coding
+
+Included Files:
+- util.py: includes implemented compress(), read_tree(), write_tree(), decompress(), and decode_byte().
+- README: this file.
+
+Running instructions:
+- compress: python ./compress.py <FILE>
+- decompress: under ./wwwroot run:
+    python ../webserver.py
+    and access localhost:8000/<FILENAME> to see the decompressed file.
+
