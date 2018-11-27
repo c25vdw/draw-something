@@ -42,10 +42,11 @@ class ClientHandlerG(threading.Thread):
             if self.canDraw:
                 self.eh.cur_pos = eh_snap["cur_pos"]  # array(tuple(2), tuple(2))
                 self.eh.color = eh_snap["color"]  # array(3)
+            else:
+                self.eh.client_answer = eh_snap["client_answer"] # later
+                self.eh.input_txt = eh_snap["input_txt"] # later
+                # print(eh_snap["input_txt"]) 
             self.eh.drawer = eh_snap["drawer"]  # int
-            
             self.eh.score = eh_snap["score"] # later
-            self.eh.client_answer = eh_snap["client_answer"] # later
-            self.eh.input_text = eh_snap["input_txt"] # later
 
             self.sock.send(self.eh.to_json().encode('utf-8'))

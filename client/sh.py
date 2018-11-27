@@ -36,13 +36,13 @@ def get_first_json_string(json_str):
 
 def parse_raw_data(data):
     # print("before loading to json: \n", data.decode('utf-8'))
-    data = data.decode('utf-8')
-    data = get_first_json_string(data)
+    _data = data.decode('utf-8')
+    data = get_first_json_string(_data)
     # print(data)
     try:
         return json.loads(data)
     except:
-        print("bad\n\n")
+        print("bad data\n{}\n{}\n".format(_data, data))
 
 class ServerHandlerG(threading.Thread):
     BUFFER_SIZE = 1024
@@ -89,7 +89,9 @@ class ServerHandlerG(threading.Thread):
                 self.color = server_eh["color"]  # array(3)
                 self.score = server_eh["score"] # later
                 self.client_answer = server_eh["client_answer"] # later
-                self.input_text = server_eh["input_txt"] # later
-
+                
+                self.input_txt = server_eh["input_txt"] # later
+            
+            print(self.input_txt)
             self.sock.sendall(self.eh.to_json().encode('utf-8'))
 
