@@ -1,10 +1,9 @@
 import socket
 from time import sleep
-import sys
-sys.path.append('..')
-from server.event_hub import EventHub
-from server.ch import ClientHandlerG as ClientHandler
-from server.huffman_handler import HuffmanHandler
+
+from event_hub import EventHub
+from client_handler import ClientHandlerG as ClientHandler
+from huffman_handler import HuffmanHandler
 
 def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -32,16 +31,19 @@ class GameServerG:
         self.eh.entries = self.entries # now server event_hub has access to entries(answers)
 
     def start(self):
-        # set up connection,
+        # set up connection, initialize two client_handler that takes the incoming socket and does updatings.
         # 1. send the client socket their id
         for player in [1,2]:
             (client_sock, client_ip) = self.sock_for_setup.accept()
             ch = ClientHandler(client_sock, player, self.eh)
             self.ch_list.append(ch)
+
+        # sleep so that client don't receive data mixed together.
         sleep(1)
+
         for ch in self.ch_list:
             ch.start()
 
         while True:
-            sleep(1000)
+            sleep(1000) # stand by so the client handler threads don't die.
         return

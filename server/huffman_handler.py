@@ -1,9 +1,11 @@
 import io
-import sys
 
+import sys
 sys.path.append('./huffman')
-import util
-import server.huffman
+
+# huffman package files
+import util # ./huffman/util
+import huffman # ./huffman/huffman
 
 class HuffmanHandler:
     def __init__(self, entries_filename='entries'):
@@ -25,8 +27,10 @@ class HuffmanHandler:
                 self.entries[level].append(string)
             else:
                 self.entries[level] = [string]
+
         # {'1': ['human', 'boat'], '2': ['dog', 'cat'], '3': ['reading', 'workout']}
         return self.entries
+        
     def decompress(self):
         self.compressed_stream = open(self.compressed_filename, 'rb')
         self.decompressed_stream = io.BytesIO()
