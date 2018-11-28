@@ -1,12 +1,8 @@
 import io
-
-import sys
-sys.path.append('./huffman')
-
+print(__package__)
 # huffman package files
-import util # ./huffman/util
-import huffman # ./huffman/huffman
-
+import server.huffman.util as util# ./huffman/util
+import server.huffman.huffman as huffman
 class HuffmanHandler:
     def __init__(self, entries_filename='entries'):
         self.compressed_filename = entries_filename + '.huf'

@@ -2,8 +2,8 @@ import threading
 import socket
 import json
 from time import sleep
-from event_hub import EventHub
-
+import sys
+from server.event_hub import EventHub
 def get_first_json_string(json_str):
     brackets = 0
     end = 0

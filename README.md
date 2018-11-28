@@ -16,3 +16,10 @@ draw something, running on private connection between two laptops!
 2. right before demo
 
     - guessing, round and difficulty.
+
+### Usage
+
+you will need one server and two clients(players) setup, you can host the server with one of the client on the same ip.
+
+to run client: python run_clilent.py
+to run server: python run_server.py

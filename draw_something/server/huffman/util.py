@@ -6,11 +6,11 @@ id #:   1539168
 CMPUT 274 FALL, 2018
 
 """
-import server.bitio
-import server.huffman
+import server.huffman.bitio as bitio
+import server.huffman.huffman as huffman
 import pickle
 import sys
-
+sys.modules['huffman'] = huffman
 
 def read_tree(tree_stream):
     '''Read a description of a Huffman tree from the given compressed

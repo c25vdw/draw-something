@@ -1,9 +1,9 @@
 import socket
 from time import sleep
 
-from event_hub import EventHub
-from client_handler import ClientHandlerG as ClientHandler
-from huffman_handler import HuffmanHandler
+from server.client_handler import ClientHandlerG as ClientHandler
+from server.huffman_handler import HuffmanHandler
+from server.event_hub import EventHub
 
 def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

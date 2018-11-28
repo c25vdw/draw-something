@@ -6,10 +6,9 @@ id #:   1539168
 CMPUT 274 FALL, 2018
 
 """
-import bitio
-import huffman
+import draw_something.server.bitio
+import draw_something.server.huffman
 import pickle
-import sys
 
 
 def read_tree(tree_stream):

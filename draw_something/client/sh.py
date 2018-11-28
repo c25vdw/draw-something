@@ -3,8 +3,6 @@ import socket
 import random
 import json
 
-import sys
-sys.path.append('..')
 from server.event_hub import EventHub
 
 def get_ip_address():

@@ -7,7 +7,11 @@ it will:
 3. run into infinite loop and update the game,
     while the game is updated through client handler, by the clients' blocked pygame's actions.
 """
-from game_server import GameServerG
+from server.game_server import GameServerG
 
-server = GameServerG()
-server.start()
+def run_server():
+    server = GameServerG()
+    server.start()
+
+if __name__ == "__main__":
+    run_server()
