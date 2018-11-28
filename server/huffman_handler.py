@@ -3,7 +3,7 @@ import sys
 
 sys.path.append('./huffman')
 import util
-import huffman
+import server.huffman
 
 class HuffmanHandler:
     def __init__(self, entries_filename='entries'):
@@ -11,7 +11,22 @@ class HuffmanHandler:
 
         self.entries_data_bytes = ""
         self.entries_data = ""
+        self.entries = {}
 
+    def get_entries(self):
+        # "1 human;1 boat;2 dog;2 cat;3 reading;3 workout;"
+        entries_str = self.decompress()
+        pairs = list(filter(lambda x: len(x) > 0, entries_str.split(";")))
+        print(pairs)
+        # load the string entries into a dictionary.
+        for pair in pairs:
+            level, string = pair.split(" ")
+            if level in self.entries:
+                self.entries[level].append(string)
+            else:
+                self.entries[level] = [string]
+        # {'1': ['human', 'boat'], '2': ['dog', 'cat'], '3': ['reading', 'workout']}
+        return self.entries
     def decompress(self):
         self.compressed_stream = open(self.compressed_filename, 'rb')
         self.decompressed_stream = io.BytesIO()
@@ -31,11 +46,10 @@ class HuffmanHandler:
 
 if __name__ == "__main__":
     hh = HuffmanHandler()
-    data = hh.decompress()
-    print(data)
+    hh.get_entries()
     # data_stream = io.BytesIO(bytes(data.encode('utf-8')))
     # freqs = huffman.make_freq_table(data_stream)
     # tree = huffman.make_tree(freqs)
     # print(freqs, tree)
-    data += "123123123"
-    hh.save_and_compress_to_file(data)
+    # data = "1 human;1 boat;2 dog;2 cat;3 reading;3 workout;"
+    # hh.save_and_compress_to_file(data)

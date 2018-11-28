@@ -1,7 +1,8 @@
 import socket
 from time import sleep
-from event_hub import EventHub
-from ch import ClientHandlerG as ClientHandler
+from server.event_hub import EventHub
+from server.ch import ClientHandlerG as ClientHandler
+from server.huffman_handler import HuffmanHandler
 
 def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -23,6 +24,10 @@ class GameServerG:
         print("listening on address {}".format((self.ip, '12345')))
         self.ch_list = []
         self.eh = EventHub()
+
+        hh = HuffmanHandler()
+        self.entries = hh.get_entries()
+        self.eh.entries = self.entries # now server event_hub has access to entries(answers)
 
     def start(self):
         # set up connection,

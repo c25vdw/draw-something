@@ -6,7 +6,7 @@ from sh import ServerHandlerG as ServerHandler
 import sys
 sys.path.append('..')
 from server.event_hub import EventHub
-from server.game_server import get_ip_address
+from server.gs import get_ip_address
 from settings import *
 from utils import *
 
@@ -18,7 +18,7 @@ pygame.init()
 font = pygame.font.Font(None, 32)
 
 # svh init - communication with server
-server_addr = ("10.0.0.172", 12345) # need to get server from user input
+server_addr = (input("server ip address: "), 12345) # need to get server from user input
 local_addr = (get_ip_address(), random.randint(10000, 20000))
 
 local_event_hub = EventHub()
