@@ -6,7 +6,7 @@ id #:   1539168
 CMPUT 274 FALL, 2018
 
 """
-import server.bitio
+import bitio
 import huffman
 import pickle
 import sys

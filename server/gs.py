@@ -1,5 +1,7 @@
 import socket
 from time import sleep
+import sys
+sys.path.append('..')
 from server.event_hub import EventHub
 from server.ch import ClientHandlerG as ClientHandler
 from server.huffman_handler import HuffmanHandler
