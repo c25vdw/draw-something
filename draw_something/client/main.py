@@ -6,7 +6,7 @@ import time
 import socket
 
 from server.event_hub import EventHub
-from utils import *
+from client.utils import *
 from client.sh import ServerHandlerG as ServerHandler
 
 

@@ -1,5 +1,5 @@
 import pygame
-from settings import *
+from client.settings import *
 
 def parse_drag_event(event, mouseDown, prevPos):
     if event.type == pygame.MOUSEBUTTONDOWN:
