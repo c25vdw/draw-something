@@ -1,3 +1,2 @@
-from client.main import client_main
-
-client_main()
+from client.main import run
+run()

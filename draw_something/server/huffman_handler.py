@@ -1,5 +1,4 @@
 import io
-print(__package__)
 # huffman package files
 import server.huffman.util as util# ./huffman/util
 import server.huffman.huffman as huffman
