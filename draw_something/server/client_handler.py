@@ -52,7 +52,7 @@ class ClientHandlerG(threading.Thread):
         self.sock.send(str(self.player_id).encode('utf-8'))
         sleep(1)
         while True:
-            self.sock.send(self.eh.to_json().encode('utf-8')) # send update to sh
+            self.sock.sendall(self.eh.to_json().encode('utf-8')) # send update to sh
 
             eh_snap = self.wait_for_eh_snap() # wait and parse eh from client.
 
@@ -73,5 +73,3 @@ class ClientHandlerG(threading.Thread):
                 # print(eh_snap["input_txt"]) 
             self.eh.drawer = eh_snap["drawer"]  # int
             self.eh.score = eh_snap["score"] # later
-
-            self.sock.send(self.eh.to_json().encode('utf-8'))
