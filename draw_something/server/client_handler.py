@@ -25,38 +25,39 @@ class ClientHandlerG(threading.Thread):
         threading.Thread.__init__(self, name="client handler")
         self.sock = client_sock
         self.player_id = player_id
+        print(self.player_id)
         self.eh = event_hub
 
     def check_client_answer(self, ca):
         if self.eh.compare_then_update_answer(ca):
             print("player {}: correct answer".format(self.player_id))
             self.eh.client_answer = ""
-
-            if self.eh.drawer_id == 1:
-                self.eh.drawer_id = 2
-            else:
+            if self.eh.drawer_id < self.eh.player_num:
+                self.eh.drawer_id += 1
+            elif self.eh.drawer_id == self.eh.player_num:
                 self.eh.drawer_id = 1
-            
+            print("Player id: ",self.player_id)
+            print("Current drawer: ",self.eh.drawer_id)
             return
             
     def wait_for_eh_snap(self):
         eh_snap_raw = self.sock.recv(self.BUFFER_SIZE) # receive from client update
-        eh_snap = eh_snap_raw.decode('utf-8')
-        eh_snap = get_first_json_string(eh_snap)
+        eh_snap = eh_snap_raw.decode()
+        # eh_snap = get_first_json_string(eh_snap)
         eh_snap = json.loads(eh_snap)
 
         return eh_snap
 
     def run(self):
         # send player id: either 1 or 2, then connection should start
-        self.sock.send(str(self.player_id).encode('utf-8'))
+        self.sock.sendall(str(self.player_id).encode())
         sleep(1)
         while True:
-            self.sock.send(self.eh.to_json().encode('utf-8')) # send update to sh
-
+            # self.sock.sendall(self.eh.to_json().encode()) # send update to sh
+            self.sock.sendall(self.eh.to_json().encode())
             eh_snap = self.wait_for_eh_snap() # wait and parse eh from client.
 
-            self.canDraw = (self.player_id == eh_snap["drawer"])
+            self.canDraw = (self.player_id == eh_snap.get("drawer_id"))
             # print("receiving eh snap: ", eh_snap, type(eh_snap))
             # if self.eh.
             if not self.canDraw:
@@ -65,13 +66,13 @@ class ClientHandlerG(threading.Thread):
             self.canDraw = (self.eh.drawer_id == self.player_id)
             
             if self.canDraw:
-                self.eh.cur_pos = eh_snap["cur_pos"]  # array(tuple(2), tuple(2))
-                self.eh.color = eh_snap["color"]
+                self.eh.cur_pos = eh_snap.get("cur_pos")  # array(tuple(2), tuple(2))
+                self.eh.color = eh_snap.get("color")
             else:
-                self.eh.client_answer = eh_snap["client_answer"] # later
-                self.eh.input_txt = eh_snap["input_txt"] # later
+                self.eh.client_answer = eh_snap.get("client_answer") # later
+                self.eh.input_txt = eh_snap.get("input_txt") # later
                 # print(eh_snap["input_txt"]) 
-            self.eh.drawer = eh_snap["drawer"]  # int
-            self.eh.score = eh_snap["score"] # later
-
-            self.sock.send(self.eh.to_json().encode('utf-8'))
+            # self.eh.drawer_id = eh_snap.get("drawer_id")  # int
+            # self.eh.score = eh_snap.get("score") # later
+            # self.sock.sendall(self.eh.to_json().encode())
+            

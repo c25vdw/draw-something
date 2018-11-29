@@ -23,7 +23,9 @@ class GameServerG:
             self.sock_for_setup.bind((self.ip, 12345))
         except:
             self.sock_for_setup.bind((self.ip, 12346))
-        self.sock_for_setup.listen(2)  # listens on public:12345
+
+        self.player_num = int(input("Enter number of players: "))
+        self.sock_for_setup.listen(self.player_num)  # listens on public:12345
 
         print("listening on address {}".format((self.ip, '12345')))
         self.ch_list = []
@@ -32,6 +34,7 @@ class GameServerG:
         hh = HuffmanHandler()
         self.entries = hh.get_entries()
         self.eh.entries = self.entries
+        self.eh.player_num = self.player_num
         self.choose_random_entry()
         self.eh.answer = self.eh.selected_entry[0]
         # now server event_hub has access to entries(answers)
@@ -46,10 +49,11 @@ class GameServerG:
     def start(self):
         # set up connection, initialize two client_handler that takes the incoming socket and does updatings.
         # 1. send the client socket their id
-        for player in [1, 2]:
+        for player in range(1, self.player_num + 1):
             (client_sock, client_ip) = self.sock_for_setup.accept()
             ch = ClientHandler(client_sock, player, self.eh)
             self.ch_list.append(ch)
+            print(player)
 
         # sleep so that client don't receive data mixed together.
         sleep(1)

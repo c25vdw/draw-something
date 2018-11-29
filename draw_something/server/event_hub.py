@@ -8,6 +8,7 @@ class EventHub:
         self.cur_pos = [(None, None), (None, None)]
         self.color = (0, 0, 0)
         self.drawer_id = 1
+        self.player_num = 0
         self.input_txt = ""
         self.client_answer = ""
         self.entries = {}
@@ -31,11 +32,11 @@ class EventHub:
         return json.dumps({
             "cur_pos": [self.cur_pos[0], self.cur_pos[1]],
             "color": [self.color[0], self.color[1], self.color[2]],
-            "drawer": self.drawer_id,
-            "score": {
-                "player_1": self.score["player_1"],
-                "player_2": self.score["player_2"]
-            },
+            "drawer_id": self.drawer_id,
+            # "score": {
+            #     "player_1": self.score["player_1"],
+            #     "player_2": self.score["player_2"]
+            # },
             "entries": self.entries,
             "selected_entry": self.selected_entry,
             "input_txt": self.input_txt,
@@ -57,5 +58,7 @@ class EventHub:
             print("server answer is now {}".format(self.answer))
         elif (self.answer == client_answer and self.cur_ans_index == len(self.selected_entry)-1):
             isCorrect = True
-            print("Reached end of list")
+            self.cur_ans_index = 0 
+            self.answer = self.selected_entry[self.cur_ans_index]
+            print("server answer is now {}".format(self.answer))
         return isCorrect
