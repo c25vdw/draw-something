@@ -1,5 +1,6 @@
 import json
 
+
 class EventHub:
     def __init__(self):
 
@@ -9,7 +10,9 @@ class EventHub:
         self.drawer_id = 1
         self.input_txt = ""
         self.client_answer = ""
-
+        self.entries = {}
+        self.selected_entry = []
+        self.cur_ans_index = 0
         # server events
         self.score = {
             'player_1': 0,
@@ -19,7 +22,7 @@ class EventHub:
 
         # for server usage
         self.answer = "dog"
-        self.pause_game = False # later
+        self.pause_game = False  # later
         self.prev_upload_id = self.drawer_id
 
         # NOTICE: more attributes might be implicitely inserted by game server or client handler. like answer_stream or so.
@@ -33,6 +36,8 @@ class EventHub:
                 "player_1": self.score["player_1"],
                 "player_2": self.score["player_2"]
             },
+            "entries": self.entries,
+            "selected_entry": self.selected_entry,
             "input_txt": self.input_txt,
             "client_answer": self.client_answer,
             "correct": self.correct,
@@ -45,8 +50,12 @@ class EventHub:
     def compare_then_update_answer(self, client_answer):
         # TODO: use answers read from game server, somehow use answer stream/sequence.
         isCorrect = False
-        if (self.answer == client_answer):
+        if (self.answer == client_answer and self.cur_ans_index < len(self.selected_entry)-1):
             isCorrect = True
-            self.answer = self.answer + "1"
+            self.cur_ans_index += 1
+            self.answer = self.selected_entry[self.cur_ans_index]
             print("server answer is now {}".format(self.answer))
+        elif (self.answer == client_answer and self.cur_ans_index == len(self.selected_entry)-1):
+            isCorrect = True
+            print("Reached end of list")
         return isCorrect
