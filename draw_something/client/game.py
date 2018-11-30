@@ -46,7 +46,8 @@ class Game:
             ip_addr = s.getsockname()[0]
             return ip_addr
         local_addr = (get_ip_address(), random.randint(10000, 20000))
-        server_addr = (input("what is the server's ip address?>"), 12345)
+        # server_addr = (input("what is the server's ip address?>"), 12345)
+        server_addr = ("10.0.0.207", 12345)
 
         self.svh = ServerHandler(self.eh, local_addr, server_addr)
 
