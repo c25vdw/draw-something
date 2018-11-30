@@ -18,9 +18,8 @@ class ClientHandlerG(threading.Thread):
         self.player_id = player_id
         self.eh = event_hub
 
-    def check_client_answer(self, ca):
-        if self.eh.compare_then_update_answer(ca,self.player_id):
-            print(ca)
+    def check_client_answer(self, client_answer):
+        if self.eh.compare_then_update_answer(client_answer,self.player_id):
             print("player {}: correct answer".format(self.player_id))
             if self.eh.drawer_id < self.eh.player_num:
                 self.eh.drawer_id += 1
@@ -47,19 +46,24 @@ class ClientHandlerG(threading.Thread):
         sleep(0.5)
 
         while True:
-            sleep(1/FPS)
             self.sock.sendall(self.eh.to_json().encode('utf-8')) # send update to sh
 
             eh_snap = self.wait_for_eh_snap() # wait and parse eh from client.
 
             self.check_client_answer(eh_snap.get("client_answer")[str(self.player_id)])
-            
-            self.canDraw = (self.eh.drawer_id == self.player_id)
 
-            if self.canDraw:
-                self.eh.cur_pos = eh_snap.get("cur_pos")  # array(tuple(2), tuple(2))
-                self.eh.color = eh_snap.get("color")
-            else:
-                self.eh.input_txt = eh_snap.get("input_txt") 
+            self.update_can_draw() # self.canDraw changed here.
+            self.update_eh_from_snap(eh_snap) # depends on self.canDraw
+    
+    def update_can_draw(self):
+        self.canDraw = (self.eh.drawer_id == self.player_id)
 
+    def update_eh_from_snap(self, eh_snap):
+        ''' eh_snap is the client eventhub copy we receive. decide which to take into server's eventhub.
+        '''
+        if self.canDraw:
+            self.eh.cur_pos = eh_snap.get("cur_pos")  # array(tuple(2), tuple(2))
+            self.eh.color = eh_snap.get("color")
+        else:
+            self.eh.input_txt = eh_snap.get("input_txt")
             

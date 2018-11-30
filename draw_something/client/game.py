@@ -24,7 +24,7 @@ class Game:
         self._init_font() # self.font
         self.eh = EventHub()
         self._init_svh() # self.svh
-
+        # self.input = Text(400, 60, self.font, (WIDTH/2, HEIGHT/2))
         # event states
         self.mouse_down = False
         self.prevPos = (None, None)
@@ -68,7 +68,7 @@ class Game:
     def _handle_keydown(self, event):
         if event.key == pygame.K_RETURN:
             self.eh.flush_input_to_client_answer(self.svh.player_id)
-            time.sleep(1)
+            time.sleep(0.1)
             self.eh.client_answer[str(self.svh.player_id)] = ""
         elif event.key == pygame.K_BACKSPACE:
             print("input: backspace.")
@@ -98,10 +98,13 @@ class Game:
         # if not pos:
         #     pos = [[0,0], [0,0]]
         # pos: [(x, y), (prev_x, prev_y)]
+        # self.input.txt = self.eh.input_txt
+        # self.input.update()
     
     def draw(self):
         self._draw_sketch() # using svh.cur_pos values.
         self._draw_text() # using svh.input_txt
+        # self._draw_score()
         pygame.display.flip()
     
     def _draw_sketch(self):
@@ -111,6 +114,12 @@ class Game:
             pygame.draw.circle(self.screen, BLACK, p[1], BRUSHRADIUS, 0)
     
     def _draw_text(self):
-        self.screen.blit(self.font.render("", True, NAVYBLUE), (WIDTH/2, HEIGHT/2))
+        # TODO: broken code.
         txt_surface = self.font.render(self.eh.input_txt, True, NAVYBLUE)
+        width, height = self.font.size(self.eh.input_txt)
+        blank = pygame.Surface((width, height))
+        blank.fill(WHITE)
+        self.screen.blit(blank, (WIDTH/2, HEIGHT/2))
+        pygame.display.flip()
         self.screen.blit(txt_surface, (WIDTH/2, HEIGHT/2))
+        # self.input.draw(self.screen)
