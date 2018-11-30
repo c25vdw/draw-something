@@ -4,20 +4,11 @@ import json
 from time import sleep
 import sys
 from server.event_hub import EventHub
-def get_first_json_string(json_str):
-    brackets = 0
-    end = 0
-    for i, char in enumerate(json_str):
-        if char == "{":
-            brackets += 1
-        elif char == "}":
-            brackets -= 1
-        
-        if brackets == 0:
-            end = i
-            break
-    return json_str[:end] + '}'
-            
+from client.game import FPS
+
+def empty_answer(client_answer):
+    for answer in client_answer:
+        client_answer[answer] = ""
 
 class ClientHandlerG(threading.Thread):
     BUFFER_SIZE = 1024
@@ -28,48 +19,47 @@ class ClientHandlerG(threading.Thread):
         self.eh = event_hub
 
     def check_client_answer(self, ca):
-        if self.eh.compare_then_update_answer(ca):
+        if self.eh.compare_then_update_answer(ca,self.player_id):
+            print(ca)
             print("player {}: correct answer".format(self.player_id))
-            self.eh.client_answer = ""
-
-            if self.eh.drawer_id == 1:
-                self.eh.drawer_id = 2
-            else:
+            if self.eh.drawer_id < self.eh.player_num:
+                self.eh.drawer_id += 1
+            elif self.eh.drawer_id == self.eh.player_num:
                 self.eh.drawer_id = 1
-            
-            return
-            
+            print("Player id: ",self.player_id)
+            print("Current drawer: ",self.eh.drawer_id)
+        return
+
     def wait_for_eh_snap(self):
         eh_snap_raw = self.sock.recv(self.BUFFER_SIZE) # receive from client update
-        eh_snap = eh_snap_raw.decode('utf-8')
-        eh_snap = get_first_json_string(eh_snap)
+        eh_snap = eh_snap_raw.decode()
+        # eh_snap = get_first_json_string(eh_snap)
         eh_snap = json.loads(eh_snap)
 
         return eh_snap
 
     def run(self):
         # send player id: either 1 or 2, then connection should start
-        self.sock.send(str(self.player_id).encode('utf-8'))
-        sleep(1)
+        self.sock.sendall(str(self.player_id).encode())
+        sleep(0.5)
+
+        self.sock.sendall(self.eh.to_json().encode())
+        sleep(0.5)
+
         while True:
+            sleep(1/FPS)
             self.sock.sendall(self.eh.to_json().encode('utf-8')) # send update to sh
 
             eh_snap = self.wait_for_eh_snap() # wait and parse eh from client.
 
-            self.canDraw = (self.player_id == eh_snap["drawer"])
-            # print("receiving eh snap: ", eh_snap, type(eh_snap))
-            # if self.eh.
-            if not self.canDraw:
-                self.check_client_answer(self.eh.client_answer)
-
-            self.canDraw = (self.eh.drawer_id == self.player_id)
+            self.check_client_answer(eh_snap.get("client_answer")[str(self.player_id)])
             
+            self.canDraw = (self.eh.drawer_id == self.player_id)
+
             if self.canDraw:
-                self.eh.cur_pos = eh_snap["cur_pos"]  # array(tuple(2), tuple(2))
-                self.eh.color = eh_snap["color"]
+                self.eh.cur_pos = eh_snap.get("cur_pos")  # array(tuple(2), tuple(2))
+                self.eh.color = eh_snap.get("color")
             else:
-                self.eh.client_answer = eh_snap["client_answer"] # later
-                self.eh.input_txt = eh_snap["input_txt"] # later
-                # print(eh_snap["input_txt"]) 
-            self.eh.drawer = eh_snap["drawer"]  # int
-            self.eh.score = eh_snap["score"] # later
+                self.eh.input_txt = eh_snap.get("input_txt") 
+
+            
