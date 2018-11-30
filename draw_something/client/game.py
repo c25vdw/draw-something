@@ -47,7 +47,11 @@ class Game:
             return ip_addr
         local_addr = (get_ip_address(), random.randint(10000, 20000))
         # server_addr = (input("what is the server's ip address?>"), 12345)
+<<<<<<< HEAD
         server_addr = ("10.0.0.207", 12345)
+=======
+        server_addr = ("172.31.123.222", 12345)
+>>>>>>> c4f87cf068748d8210a82cbe28b7a4feef849d7d
 
         self.svh = ServerHandler(self.eh, local_addr, server_addr)
 
@@ -111,5 +115,5 @@ class Game:
     
     def _draw_text(self):
         self.screen.blit(self.font.render("", True, NAVYBLUE), (WIDTH/2, HEIGHT/2))
-        txt_surface = self.font.render(self.svh.input_txt, True, NAVYBLUE)
+        txt_surface = self.font.render(self.eh.input_txt, True, NAVYBLUE)
         self.screen.blit(txt_surface, (WIDTH/2, HEIGHT/2))
