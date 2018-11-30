@@ -11,37 +11,14 @@ def get_ip_address():
     ip_addr = s.getsockname()[0]
     return ip_addr
 
-def get_first_json_string(json_str):
-    has_bracket = False
-    for m in json_str:
-        if m == '{':
-            has_bracket = True
-            break
-    if not has_bracket:
-        return json_str
-    brackets = 0
-    end = 0
-    for i, char in enumerate(json_str):
-        if char == "{":
-            brackets += 1
-        elif char == "}":
-            brackets -= 1
-        
-        if brackets == 0:
-            end = i
-            break
-    return json_str[:end] + '}'
-
 def parse_raw_data(data):
     # print("before loading to json: \n", data.decode())
-    _data = data.decode()
-    data = get_first_json_string(_data)
+    data = data.decode()
     # print(data)
     try:
         return json.loads(data)
     except:
-        print("bad data\n{}\n{}\n".format(_data, data))
-        # pass
+        pass
 
 class ServerHandlerG(threading.Thread):
     BUFFER_SIZE = 1024
@@ -73,7 +50,9 @@ class ServerHandlerG(threading.Thread):
         player_id_raw = self.sock.recv(self.BUFFER_SIZE)
         self.player_id = parse_raw_data(player_id_raw)
         print("received player id: {}.".format(self.player_id))
-
+        data = self.sock.recv(self.BUFFER_SIZE)
+        data = parse_raw_data(data)
+        self.eh.client_answer = data.get("client_answer")
         while True:
             # waits for server event hub snap
             server_eh_snap_raw = self.sock.recv(self.BUFFER_SIZE)
@@ -87,9 +66,7 @@ class ServerHandlerG(threading.Thread):
                 self.cur_pos = server_eh["cur_pos"]  # array(tuple(2), tuple(2))
                 self.color = server_eh["color"]  # array(3)
                 # self.score = server_eh["score"] # later
-                self.client_answer = server_eh["client_answer"] # later
-                
+                self.client_answer = server_eh["client_answer"]
                 self.input_txt = server_eh["input_txt"] # later
             # print("drawer id: ", server_eh["drawer"], ". self id: ", self.player_id)
             self.sock.sendall(self.eh.to_json().encode())
-

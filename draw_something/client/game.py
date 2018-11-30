@@ -47,7 +47,7 @@ class Game:
             return ip_addr
         local_addr = (get_ip_address(), random.randint(10000, 20000))
         # server_addr = (input("what is the server's ip address?>"), 12345)
-        server_addr = ("172.31.123.222", 12345)
+        server_addr = ("10.0.0.207", 12345)
 
         self.svh = ServerHandler(self.eh, local_addr, server_addr)
 
@@ -58,7 +58,7 @@ class Game:
     def handle_pygame_event(self, event):
         if event.type == pygame.QUIT:
             pygame.quit()
-        elif event.type == pygame.KEYDOWN:
+        elif not self.svh.canDraw and event.type == pygame.KEYDOWN:
             self._handle_keydown(event)
         elif event.type == pygame.MOUSEBUTTONDOWN or \
              event.type == pygame.MOUSEBUTTONUP:
@@ -67,8 +67,9 @@ class Game:
 
     def _handle_keydown(self, event):
         if event.key == pygame.K_RETURN:
-            print("input: submitted answer")
-            self.eh.flush_input_to_client_answer()
+            self.eh.flush_input_to_client_answer(self.svh.player_id)
+            time.sleep(1)
+            self.eh.client_answer[str(self.svh.player_id)] = ""
         elif event.key == pygame.K_BACKSPACE:
             print("input: backspace.")
             self.eh.input_txt = self.eh.input_txt[:-1]

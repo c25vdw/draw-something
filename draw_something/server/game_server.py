@@ -34,9 +34,9 @@ class GameServerG:
         hh = HuffmanHandler()
         self.entries = hh.get_entries()
         self.eh.entries = self.entries
-        self.eh.player_num = self.player_num
+        
         self.choose_random_entry()
-        self.eh.answer = self.eh.selected_entry[0]
+        self.init_player_props()
         # now server event_hub has access to entries(answers)
 
     def choose_random_entry(self):
@@ -45,6 +45,14 @@ class GameServerG:
         self.eh.selected_entry = self.eh.entries[chosenEntry]
         print(self.eh.selected_entry)
         return
+
+    def init_player_props(self):
+        self.eh.player_num = self.player_num
+        self.eh.answer = self.eh.selected_entry[0]
+        print("First answer is ", self.eh.answer)
+        for i in range(1,self.eh.player_num+1):
+            self.eh.client_answer[str(i)] = "" 
+
 
     def start(self):
         # set up connection, initialize two client_handler that takes the incoming socket and does updatings.
