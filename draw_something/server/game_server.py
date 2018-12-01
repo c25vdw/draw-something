@@ -24,7 +24,8 @@ class GameServerG:
         self.eh = EventHub()
 
         self.init_sock_for_setup()
-        self.init_eh_entries()
+        self.init_eh_entries() # define entries
+        self.init_eh_score() # define score
         self.init_player_props()
         # now server event_hub has access to entries(answers), selected_entry
 
@@ -50,6 +51,12 @@ class GameServerG:
         # self._choose_random_entry()
         self._choose_entry_from_level()
 
+    def init_eh_score(self):
+        score = {}
+        for i in range(1, self.player_num + 1):
+            score[str(i)] = 0
+        self.eh.score = score
+        
     def init_sock_for_setup(self):
         '''create self.sock_for_setup, start listening on port 12345'''
         self.sock_for_setup = socket.socket()

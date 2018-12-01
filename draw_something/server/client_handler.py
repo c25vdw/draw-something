@@ -25,8 +25,11 @@ class ClientHandlerG(threading.Thread):
                 self.eh.drawer_id += 1
             elif self.eh.drawer_id == self.eh.player_num:
                 self.eh.drawer_id = 1
-            print("Player id: ",self.player_id)
             print("Current drawer: ",self.eh.drawer_id)
+
+            # increment score of this client.
+            self.eh.score[str(self.player_id)] += 1
+            print("current score: ", self.eh.score)
         return
 
     def wait_for_eh_snap(self):
