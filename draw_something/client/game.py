@@ -21,6 +21,7 @@ class Game:
         """
         pygame.init()
         self._init_window() # self.screen
+        self._init_components() # self.canvas, toolbar and INPUT_BOX
         self._init_font() # self.font
         self.eh = EventHub()
         self._init_svh() # self.svh
@@ -30,12 +31,23 @@ class Game:
         self.prevPos = (None, None)
     
     def _init_window(self):
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        self.screen.fill(BGCOLOR)
+        self.screen = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
+        self.screen.fill(SCREENBG)
         pygame.display.set_caption("Draw something!")
         # may be draw something here.
         pygame.display.flip()
     
+    def _init_components(self):
+        self.canvas = pygame.Surface((CANVASWIDTH, CANVASHEIGHT))
+        self.canvas.fill(CANVASBG)
+        
+        self.toolbar = pygame.Surface((TOOLBARWIDTH,TOOLBARHEIGHT))
+        self.toolbar.fill(ORANGE)
+        self.screen.blit(self.toolbar, (MARGIN,MARGIN))
+
+        self.INPUT_BOX = pygame.Surface((INPUTBOXWIDTH,INPUTBOXHEIGHT))
+        self.INPUT_BOX.fill(RED)
+
     def _init_font(self):
         self.font = pygame.font.Font(None, 48)
 
@@ -79,47 +91,44 @@ class Game:
 
     def _handle_mouse_up_down(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
-            self.mouse_down = True
-            self.prevPos = pygame.mouse.get_pos()
-        elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
-                self.mouse_down = False
-                print("mouse up")
+                self.eh.color = BLACK
+            elif event.button == 3:
+                self.eh.color = CANVASBG
+            self.mouse_down = True
+            (xp, yp) = pygame.mouse.get_pos()
+            self.prevPos = (xp + XPOSOFFSET * -1, yp - MARGIN)
+        elif event.type == pygame.MOUSEBUTTONUP:
+            self.mouse_down = False
+            print("mouse up")
     
     def update(self):
         if self.mouse_down:
             (x, y) = pygame.mouse.get_pos()
             # update local cursor position
-            self.eh.cur_pos = [(x, y), self.prevPos]
-            self.prevPos = (x, y)
+            self.eh.cur_pos = [(x + XPOSOFFSET * -1, y - MARGIN), self.prevPos]
+            self.prevPos = (x + XPOSOFFSET * -1, y - MARGIN)
         else:
             self.eh.cur_pos = [(None, None), (None, None)]
-        ###### seems to be redundant. vv
-        # if not pos:
-        #     pos = [[0,0], [0,0]]
-        # pos: [(x, y), (prev_x, prev_y)]
-        # self.input.txt = self.eh.input_txt
-        # self.input.update()
-    
+
     def draw(self):
         self._draw_sketch() # using svh.cur_pos values.
-        self._draw_text() # using svh.input_txt
-        # self._draw_score()
+        self.input_box = self._draw_text() # using svh.input_txt
+
+        self.screen.blit(self.canvas, (XPOSOFFSET,MARGIN))
+        self.screen.blit(self.input_box, (XPOSOFFSET, CANVASHEIGHT + MARGIN))
+
         pygame.display.flip()
     
     def _draw_sketch(self):
         if self.svh.cur_pos != [[None, None], [None, None]]:
             p = self.svh.cur_pos
-            pygame.draw.line(self.screen, BLACK, p[0], p[1], LINEWIDTH)
-            pygame.draw.circle(self.screen, BLACK, p[1], BRUSHRADIUS, 0)
-    
+            pygame.draw.line(self.canvas, self.svh.color, p[0], p[1], LINEWIDTH)
+            pygame.draw.circle(self.canvas, self.svh.color, p[1], BRUSHRADIUS, 0)
+            
     def _draw_text(self):
-        # TODO: broken code.
+        # create a new copy of texts
         txt_surface = self.font.render(self.eh.input_txt, True, NAVYBLUE)
-        width, height = self.font.size(self.eh.input_txt)
-        blank = pygame.Surface((width, height))
-        blank.fill(WHITE)
-        self.screen.blit(blank, (WIDTH/2, HEIGHT/2))
-        pygame.display.flip()
-        self.screen.blit(txt_surface, (WIDTH/2, HEIGHT/2))
-        # self.input.draw(self.screen)
+        self.input_box = self.INPUT_BOX.copy()
+        self.input_box.blit(txt_surface, (0, 0))
+        return self.input_box
