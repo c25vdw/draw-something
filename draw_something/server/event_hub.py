@@ -16,8 +16,8 @@ class EventHub:
         self.cur_ans_index = 0
         # server events
         self.score = {
-            'player_1': 0,
-            'player_2': 0
+            '1': 0,
+            '2': 0
         }
         self.correct = False
 
@@ -37,6 +37,7 @@ class EventHub:
             #     "player_1": self.score["player_1"],
             #     "player_2": self.score["player_2"]
             # },
+            "score": self.score,
             "entries": self.entries,
             "selected_entry": self.selected_entry,
             "input_txt": self.input_txt,
