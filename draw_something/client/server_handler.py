@@ -52,6 +52,7 @@ class ServerHandlerG(threading.Thread):
         print("received player id: {}.".format(self.player_id))
         data = self.sock.recv(self.BUFFER_SIZE)
         data = parse_raw_data(data)
+        print("data: ", data)
         self.eh.client_answer = data.get("client_answer")
         while True:
             # waits for server event hub snap
@@ -68,5 +69,7 @@ class ServerHandlerG(threading.Thread):
                 # self.score = server_eh["score"] # later
                 self.client_answer = server_eh["client_answer"]
                 self.input_txt = server_eh["input_txt"] # later
+
+                self.score = server_eh["score"]
             # print("drawer id: ", server_eh["drawer"], ". self id: ", self.player_id)
             self.sock.sendall(self.eh.to_json().encode())

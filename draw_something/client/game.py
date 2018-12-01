@@ -21,11 +21,11 @@ class Game:
         """
         pygame.init()
         self._init_window() # self.screen
-        self._init_components()
+        self._init_components() # self.canvas, toolbar and INPUT_BOX
         self._init_font() # self.font
         self.eh = EventHub()
         self._init_svh() # self.svh
-
+        # self.input = Text(400, 60, self.font, (WIDTH/2, HEIGHT/2))
         # event states
         self.mouse_down = False
         self.prevPos = (None, None)
@@ -59,7 +59,7 @@ class Game:
             return ip_addr
         local_addr = (get_ip_address(), random.randint(10000, 20000))
         # server_addr = (input("what is the server's ip address?>"), 12345)
-        server_addr = ("10.0.0.207", 12345)
+        server_addr = ("10.0.0.172", 12345)
 
         self.svh = ServerHandler(self.eh, local_addr, server_addr)
 
@@ -125,7 +125,9 @@ class Game:
             p = self.svh.cur_pos
             pygame.draw.line(self.canvas, self.svh.color, p[0], p[1], LINEWIDTH)
             pygame.draw.circle(self.canvas, self.svh.color, p[1], BRUSHRADIUS, 0)
+            
     def _draw_text(self):
+        # create a new copy of texts
         txt_surface = self.font.render(self.eh.input_txt, True, NAVYBLUE)
         self.input_box = self.INPUT_BOX.copy()
         self.input_box.blit(txt_surface, (0, 0))
