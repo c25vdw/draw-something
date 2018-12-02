@@ -1,15 +1,14 @@
 import threading
 import socket
-import random
 import json
 
-from server.event_hub import EventHub
 
 def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
     ip_addr = s.getsockname()[0]
     return ip_addr
+
 
 def parse_raw_data(data):
     # print("before loading to json: \n", data.decode())
@@ -20,26 +19,29 @@ def parse_raw_data(data):
     except:
         pass
 
+
 class ServerHandlerG(threading.Thread):
     BUFFER_SIZE = 1024
-    def __init__(self,  event_hub, ip, server_ip):
+
+    def __init__(self, event_hub, ip, server_ip):
         threading.Thread.__init__(self, name="server handler")
         self.eh = event_hub
         self.ip = ip
         self.server_ip = server_ip
         self.sock = socket.socket()
-        print("client ipi: ~~~~~~~~~~~~~~~~~~~~~~`",self.ip)
+        print("client ipi: ~~~~~~~~~~~~~~~~~~~~~~`", self.ip)
         self.sock.bind(self.ip)
         self.player_id = 0
-        
+
         # event hub proxy variables
         self.cur_pos = None  # array(tuple(2), tuple(2))
         self.color = None  # array(3)
-        self.drawer_id =None # int
+        self.drawer_id = None  # int
         self.canDraw = None
-        self.score =None
+        self.score = None
         self.client_answer = None
         self.input_txt = None
+
     def run(self):
         try:
             self.sock.connect(self.server_ip)
@@ -64,12 +66,13 @@ class ServerHandlerG(threading.Thread):
                 self.drawer_id = server_eh["drawer_id"]  # int
                 self.canDraw = (self.player_id == server_eh["drawer_id"])
             # if not self.canDraw:
-                self.cur_pos = server_eh["cur_pos"]  # array(tuple(2), tuple(2))
+                # array(tuple(2), tuple(2))
+                self.cur_pos = server_eh["cur_pos"]
                 self.color = server_eh["color"]  # array(3)
                 # self.score = server_eh["score"] # later
                 self.client_answer = server_eh["client_answer"]
-                self.input_txt = server_eh["input_txt"] # later
-
+                self.input_txt = server_eh["input_txt"]  # later
+                self.answer = server_eh["answer"]  # encrypt this??
                 self.score = server_eh["score"]
             # print("drawer id: ", server_eh["drawer"], ". self id: ", self.player_id)
             self.sock.sendall(self.eh.to_json().encode())
