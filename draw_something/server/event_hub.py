@@ -22,7 +22,7 @@ class EventHub:
         self.correct = False
 
         # for server usage
-        self.answer =""
+        self.answer = ""
         self.pause_game = False  # later
         self.prev_upload_id = self.drawer_id
 
@@ -43,24 +43,25 @@ class EventHub:
             "input_txt": self.input_txt,
             "client_answer": self.client_answer,
             "correct": self.correct,
+            "answer": self.answer
         })
 
-    def flush_input_to_client_answer(self,player_id):
+    def flush_input_to_client_answer(self, player_id):
         self.client_answer[str(player_id)] = self.input_txt
         self.input_txt = ""
 
-    def compare_then_update_answer(self, client_answer,player_id):
+    def compare_then_update_answer(self, client_answer, player_id):
         # TODO: use answers read from game server, somehow use answer stream/sequence.
         isCorrect = False
-        if (self.answer == client_answer and self.cur_ans_index < len(self.selected_entry)-1):
+        if (self.answer == client_answer and self.cur_ans_index < len(self.selected_entry) - 1):
             isCorrect = True
             self.cur_ans_index += 1
             self.answer = self.selected_entry[self.cur_ans_index]
             self.client_answer[str(player_id)] = ""
             print("server answer is now {}".format(self.answer))
-        elif (self.answer == client_answer and self.cur_ans_index == len(self.selected_entry)-1):
+        elif (self.answer == client_answer and self.cur_ans_index == len(self.selected_entry) - 1):
             isCorrect = True
-            self.cur_ans_index = 0 
+            self.cur_ans_index = 0
             self.answer = self.selected_entry[self.cur_ans_index]
             self.client_answer[str(player_id)] = ""
             print("server answer is now {}".format(self.answer))

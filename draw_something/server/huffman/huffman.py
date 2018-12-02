@@ -1,16 +1,16 @@
-from collections import Counter
-
 class Tree:
     """
     Stores the Huffman tree itself as a collection of nodes,
-    for pickling. 
+    for pickling.
 
     The root of the tree is redefined for easy access to the start
     of the tree.
     """
+
     def __init__(self, nodes, root):
         self.nodes = nodes
         self.root = root
+
 
 class TreeLeaf:
     """
@@ -19,20 +19,24 @@ class TreeLeaf:
     Should store an 8-bit integer to represent a single byte, or None
     to indicate the special "end of message" character.
     """
+
     def __init__(self, val):
         self.value = val
+
 
 class TreeBranch:
     """
     Simple representation of an internal node on a Huffman tree.
     Just stores the two children.
     """
+
     def __init__(self, left, right):
         self.left = left
         self.right = right
-        
+
+
 def custom_min(trees):
-    """ Takes a list of tuples called trees, finds the smallest 
+    """ Takes a list of tuples called trees, finds the smallest
     item and removes it from the list. Both the smallest item and
     new list are returned.
 
@@ -61,6 +65,7 @@ def custom_min(trees):
 
     return min_item[0], min_item[1], trees
 
+
 def make_tree(freq_table):
     """
     Constructs and returns the Huffman tree from the given frequency table.
@@ -74,7 +79,7 @@ def make_tree(freq_table):
     while len(trees) > 1:
         right, rfreq, trees = custom_min(trees)
         left, lfreq, trees = custom_min(trees)
-        trees.append((TreeBranch(left, right), lfreq+rfreq))
+        trees.append((TreeBranch(left, right), lfreq + rfreq))
 
     root_node, _, _ = custom_min(trees)
 
@@ -82,6 +87,7 @@ def make_tree(freq_table):
     tree = Tree(trees, root_node)
 
     return tree
+
 
 def make_encoding_table(huffman_tree):
     """
@@ -104,6 +110,7 @@ def make_encoding_table(huffman_tree):
     recurse(huffman_tree, ())
     return table
 
+
 def make_freq_table(stream):
     """
     Given an input stream, will construct a frequency table
@@ -112,13 +119,15 @@ def make_freq_table(stream):
     The frequency table is actually a dictionary.
     """
     buffer_size = 512
-    
+
     freq = {}
     while True:
         read_buffer = stream.read(buffer_size)
         for char in read_buffer:
-            if char in freq: freq[char] += 1
-            else: freq[char] = 1
+            if char in freq:
+                freq[char] += 1
+            else:
+                freq[char] = 1
 
         if len(read_buffer) < buffer_size:
             break

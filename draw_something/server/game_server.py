@@ -1,5 +1,5 @@
 import socket
-from random import randint
+import random
 from time import sleep
 import sys
 
@@ -19,18 +19,19 @@ class GameServerG:
     def __init__(self):
         self.player_num = int(input("Enter number of players: "))
         self.level = self.get_level(default=2)
-        print("level is: ",self.level)
+        print("level is: ", self.level)
         self.ch_list = []
         self.eh = EventHub()
 
         self.init_sock_for_setup()
-        self.init_eh_entries() # define entries
-        self.init_eh_score() # define score
+        self.init_eh_entries()  # define entries
+        self.init_eh_score()  # define score
         self.init_player_props()
         # now server event_hub has access to entries(answers), selected_entry
 
     def get_level(self, default=2):
         level = input("Nice!\nNow enter difficulty(1 to 3, default 2) > ")
+
         def error_exit():
             print("should be a integer between 1 and 3.")
             sys.exit(1)
@@ -56,7 +57,7 @@ class GameServerG:
         for i in range(1, self.player_num + 1):
             score[str(i)] = 0
         self.eh.score = score
-        
+
     def init_sock_for_setup(self):
         '''create self.sock_for_setup, start listening on port 12345'''
         self.sock_for_setup = socket.socket()
@@ -65,14 +66,15 @@ class GameServerG:
         self.sock_for_setup.bind((self.ip, 12345))
 
         self.sock_for_setup.listen(self.player_num)  # listens on public:12345
-        print("listening for {} clients on address: {}".format(self.player_num, (self.ip, '12345')))
+        print("listening for {} clients on address: {}".format(
+            self.player_num, (self.ip, '12345')))
 
     def _choose_entry_from_level(self):
         self.eh.selected_entry = self.eh.entries[str(self.level)]
 
     def _choose_random_entry(self):
         entriesLen = len(self.eh.entries)
-        chosenEntry = str(randint(1, entriesLen))
+        chosenEntry = str(random.randint(1, entriesLen))
         self.eh.selected_entry = self.eh.entries[chosenEntry]
         print(self.eh.selected_entry)
         return
@@ -82,11 +84,12 @@ class GameServerG:
         assign player_num, answer and client_answer(placeholders) to eh.
         '''
         self.eh.player_num = self.player_num
+        random.shuffle(self.eh.selected_entry)
         self.eh.answer = self.eh.selected_entry[0]
-        print("First answer is ", self.eh.answer)
-        for i in range(1,self.eh.player_num+1):
-            self.eh.client_answer[str(i)] = "" 
 
+        print("First answer is ", self.eh.answer)
+        for i in range(1, self.eh.player_num + 1):
+            self.eh.client_answer[str(i)] = ""
 
     def start(self):
         # set up connection, initialize two client_handler that takes the incoming socket and does updatings.

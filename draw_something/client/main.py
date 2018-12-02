@@ -2,6 +2,8 @@
 run client(pygame front end)
 this should only be called by ../run_client.py
 """
+
+
 def run():
     import pygame
     from client.game import Game

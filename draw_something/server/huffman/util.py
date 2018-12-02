@@ -12,6 +12,7 @@ import pickle
 import sys
 sys.modules['huffman'] = huffman
 
+
 def read_tree(tree_stream):
     '''Read a description of a Huffman tree from the given compressed
     tree stream, and use the pickle module to construct the tree object.
@@ -25,7 +26,8 @@ def read_tree(tree_stream):
     '''
     tree = pickle.load(tree_stream)
     return tree
-    
+
+
 def decode_byte(tree, bitreader):
     """
     Reads bits from the bit reader and traverses the tree from
@@ -44,18 +46,19 @@ def decode_byte(tree, bitreader):
         while True:
             try:
                 bit = bitreader.readbit()
-            except EOFError: # end of file, manually break
+            except EOFError:  # end of file, manually break
                 break
 
             if bit == 0:
                 curr = curr.left
             elif bit == 1:
                 curr = curr.right
-            if hasattr(curr, 'value'): # is a leaf
+            if hasattr(curr, 'value'):  # is a leaf
                 return curr.value
     except:
         print("you have wrong file modes, please use 'wb' and 'rb'")
         sys.exit(1)
+
 
 def decompress(compressed, uncompressed):
     '''First, read a Huffman tree from the 'tree_stream' using your
@@ -77,13 +80,13 @@ def decompress(compressed, uncompressed):
         while True:
             try:
                 bit = decode_byte(tree, bitReader)
-            except EOFError: # until file ends
+            except EOFError:  # until file ends
                 break
-            if bit == None: # check for invalid bit
+            if bit is None:  # check for invalid bit
                 break
             bitWriter.writebits(bit, 8)
         bitWriter.flush()
-    except: # check for file io errors, most possibly mode errors
+    except:  # check for file io errors, most possibly mode errors
         print("you have wrong file modes, please use 'wb' and 'rb'")
         compressed.close()
         sys.exit(1)
@@ -94,6 +97,7 @@ def decompress(compressed, uncompressed):
     uncompressed.close()
     return uncompressed_bytes
 
+
 def write_tree(tree, tree_stream):
     '''Write the specified Huffman tree to the given tree_stream
     using pickle.
@@ -103,6 +107,7 @@ def write_tree(tree, tree_stream):
       tree_stream: The binary file to write the tree to.
     '''
     pickle.dump(tree, tree_stream)
+
 
 def compress(tree, uncompressed, compressed):
     '''First write the given tree to the stream 'tree_stream' using the
@@ -132,7 +137,7 @@ def compress(tree, uncompressed, compressed):
                     bitWriter.writebit(b)
         except EOFError:
             bitWriter.flush()
-        
+
     except:
         print("you have wrong file modes, please use 'wb' and 'rb'")
         compressed.close()
@@ -141,4 +146,3 @@ def compress(tree, uncompressed, compressed):
     # always closes two files
     compressed.close()
     uncompressed.close()
-
