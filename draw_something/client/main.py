@@ -11,7 +11,7 @@ def run():
     clock = pygame.time.Clock()
 
     g.before_loop()
-    while True:
+    while g.running:
         clock.tick(g.FPS)
         # event handling
         for event in pygame.event.get():
