@@ -1,7 +1,9 @@
 import pygame
+import pygame.gfxdraw
 import time
 import socket
 import random
+import math
 
 from server.event_hub import EventHub
 from client.server_handler import ServerHandlerG as ServerHandler
@@ -29,6 +31,7 @@ class Game:
         self.eh = EventHub()
         self._init_svh()  # self.svh
         self._init_components()  # self.canvas, toolbar and INPUT_BOX
+        self._init_matrix_for_brush()
         # self.input = Text(400, 60, self.font, (WIDTH/2, HEIGHT/2))
         # event states
         self.mouse_down = False
@@ -48,13 +51,11 @@ class Game:
         pygame.display.flip()
 
     def _init_components(self):
+        self.INFO_BAR = pygame.Surface((INFOBARWIDTH,INFOBARHEIGHT))
+        self.INFO_BAR.fill(INFOBARBG)
+
         self.canvas = pygame.Surface((CANVASWIDTH, CANVASHEIGHT))
         self.canvas.fill(CANVASBG)
-
-        self.toolbar = pygame.Surface((TOOLBARWIDTH, TOOLBARHEIGHT))
-        self.toolbar.fill(ORANGE)
-        self.screen.blit(self.toolbar, (MARGIN, MARGIN))
-
         # self.info_screen = pygame.Surface((SCREENWIDTH, SCREENHEIGHT))
         # self.info_screen.fill(YELLOW_1)
 
@@ -66,6 +67,7 @@ class Game:
 
     def _init_font(self):
         self.font = pygame.font.Font(None, 48)
+        self.desc_font = pygame.font.Font("client\_fonts\Roboto.ttf", 16)
 
     def _init_svh(self):
         def get_ip_address():
@@ -75,9 +77,17 @@ class Game:
             return ip_addr
         local_addr = (get_ip_address(), random.randint(10000, 20000))
         # server_addr = (input("what is the server's ip address?>"), 12345)
-        server_addr = ("10.0.0.172", 12345)
+        server_addr = ("10.0.0.207", 12345)
 
         self.svh = ServerHandler(self.eh, local_addr, server_addr)
+
+    def _init_matrix_for_brush(self):
+        self.matrix = []
+        x,y=-1,1
+        for i in range(0,3):
+            for j in range(0,3):
+                self.matrix.append([x+j,y])
+            y -=1
 
     def before_loop(self):
         self.svh.start()
@@ -115,7 +125,7 @@ class Game:
 
             self.mouse_down = True
             (xp, yp) = pygame.mouse.get_pos()
-            self.prevPos = (xp + XPOSOFFSET * -1, yp - MARGIN)
+            self.prevPos = (xp + MARGIN * -1, yp - YOFFSET)
         elif event.type == pygame.MOUSEBUTTONUP:
             self.mouse_down = False
             print("mouse up")
@@ -124,8 +134,8 @@ class Game:
         if self.mouse_down:
             (x, y) = pygame.mouse.get_pos()
             # update local cursor position
-            self.eh.cur_pos = [(x + XPOSOFFSET * -1, y - MARGIN), self.prevPos]
-            self.prevPos = (x + XPOSOFFSET * -1, y - MARGIN)
+            self.eh.cur_pos = [(x + MARGIN * -1, y - YOFFSET), self.prevPos]
+            self.prevPos = (x + MARGIN * -1, y - YOFFSET)
         else:
             self.eh.cur_pos = [(None, None), (None, None)]
 
@@ -138,28 +148,33 @@ class Game:
         pass
 
     def _update_drawer_changed(self):
+        self.eh.restart_timer = False
         if self.svh.drawer_id != self.prev_drawer_id:
             self.drawer_changed = True
             self.drawer_changed_timestamp = pygame.time.get_ticks()
-
         if self.drawer_changed:
+            self.eh.correct = True
             time_past = pygame.time.get_ticks() - self.drawer_changed_timestamp
             if time_past > self.info_screen.timeout:
                 self.drawer_changed = False
+                self.eh.restart_timer = True
+                self.eh.correct = False
 
         self.prev_drawer_id = self.svh.drawer_id
 
     def draw(self):
         self.screen.fill(SCREENBG)
         if self.drawer_changed:
+            self.canvas.fill(CANVASBG)
             self._draw_info_screen()
         else:
             self._draw_sketch()  # using svh.cur_pos values.
             self.input_box = self._draw_text()  # using svh.input_txt
-
-            self.screen.blit(self.canvas, (XPOSOFFSET, MARGIN))
+            self.info_bar = self._draw_info_bar()
+            self.screen.blit(self.info_bar,(0,0))
+            self.screen.blit(self.canvas, (MARGIN, INFOBARHEIGHT))
             self.screen.blit(
-                self.input_box, (XPOSOFFSET, CANVASHEIGHT + MARGIN))
+                self.input_box, (MARGIN, CANVASHEIGHT + MARGIN))
 
         pygame.display.flip()
 
@@ -168,17 +183,33 @@ class Game:
         # self.screen.blit(self.info_screen, (0, 0))
         self.info_screen.draw(self.prev_answer)
 
+    def _draw_info_bar(self):
+        round_number = self.desc_font.render("Round: {}/{}".format(self.svh.cur_ans_index + 1,self.svh.entry_length), True, INFOBAR_TEXTCOLOR)
+        if self.svh.canDraw:
+            drawing_role = self.desc_font.render("Draw: {}".format(self.svh.answer),True, INFOBAR_TEXTCOLOR)
+        else:
+            drawing_role = self.desc_font.render("Your turn to guess!",True, INFOBAR_TEXTCOLOR)
+        formatted_time = str(self.svh.count_down).zfill(2)     #add leading 0 to single digit number
+        count_down = self.desc_font.render("00:{}".format(formatted_time), True, BLACK)
+
+        self.info_bar = self.INFO_BAR.copy()
+        self.info_bar.blit(drawing_role, (20,15))
+        self.info_bar.blit(round_number, (500,15))
+        self.info_bar.blit(count_down, (300,15))
+        pygame.draw.rect(self.info_bar, INFOBAR_BORDERCOLOR, (0,INFOBARHEIGHT - INFOBAR_BORDERHEIGHT, INFOBAR_BORDERWIDTH, INFOBAR_BORDERHEIGHT), 0)
+        return self.info_bar
     def _draw_sketch(self):
         if self.svh.cur_pos != [[None, None], [None, None]]:
             p = self.svh.cur_pos
-            pygame.draw.line(self.canvas, self.svh.color,
-                             p[0], p[1], LINEWIDTH)
-            pygame.draw.circle(self.canvas, self.svh.color,
-                               p[1], BRUSHRADIUS, 0)
+            for i in range(0,9):
+                pygame.draw.aaline(self.canvas, self.svh.color,(p[0][0] + self.matrix[i][0],p[0][1]+self.matrix[i][1]), (p[1][0]+ self.matrix[i][0],p[1][1]+self.matrix[i][1]),1)
+
+            # pygame.draw.line(self.canvas, self.svh.color,p[0], p[1], LINEWIDTH)
+            # pygame.draw.circle(self.canvas, self.svh.color,p[1], BRUSHRADIUS, 0)
 
     def _draw_text(self):
         # create a new copy of texts
-        txt_surface = self.font.render(self.eh.input_txt, True, NAVYBLUE)
+        txt_surface = self.font.render(self.eh.input_txt, True, BLACK)
         self.input_box = self.INPUT_BOX.copy()
         self.input_box.blit(txt_surface, (0, 0))
         return self.input_box

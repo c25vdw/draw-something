@@ -20,7 +20,8 @@ class EventHub:
             '2': 0
         }
         self.correct = False
-
+        self.restart_timer = False
+        self.count_down = 0
         # for server usage
         self.answer = ""
         self.pause_game = False  # later
@@ -33,17 +34,16 @@ class EventHub:
             "cur_pos": [self.cur_pos[0], self.cur_pos[1]],
             "color": [self.color[0], self.color[1], self.color[2]],
             "drawer_id": self.drawer_id,
-            # "score": {
-            #     "player_1": self.score["player_1"],
-            #     "player_2": self.score["player_2"]
-            # },
+            "cur_ans_index": self.cur_ans_index,
             "score": self.score,
             "entries": self.entries,
             "selected_entry": self.selected_entry,
             "input_txt": self.input_txt,
             "client_answer": self.client_answer,
             "correct": self.correct,
-            "answer": self.answer
+            "answer": self.answer,
+            "restart_timer": self.restart_timer,
+            "count_down": self.count_down,
         })
 
     def flush_input_to_client_answer(self, player_id):
@@ -66,3 +66,11 @@ class EventHub:
             self.client_answer[str(player_id)] = ""
             print("server answer is now {}".format(self.answer))
         return isCorrect
+
+    def update_answer(self):
+        if (self.cur_ans_index < len(self.selected_entry) - 1):
+            self.cur_ans_index += 1
+            self.answer = self.selected_entry[self.cur_ans_index]
+        elif (self.cur_ans_index == len(self.selected_entry) - 1):
+            self.cur_ans_index = 0
+            self.answer = self.selected_entry[self.cur_ans_index]

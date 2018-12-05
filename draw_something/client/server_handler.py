@@ -74,5 +74,8 @@ class ServerHandlerG(threading.Thread):
                 self.input_txt = server_eh["input_txt"]  # later
                 self.answer = server_eh["answer"]  # encrypt this??
                 self.score = server_eh["score"]
+                self.cur_ans_index = server_eh["cur_ans_index"]
+                self.entry_length = len(server_eh["selected_entry"])
+                self.count_down = server_eh["count_down"]
             # print("drawer id: ", server_eh["drawer"], ". self id: ", self.player_id)
             self.sock.sendall(self.eh.to_json().encode())
