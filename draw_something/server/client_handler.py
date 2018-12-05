@@ -13,6 +13,7 @@ def empty_answer(client_answer):
 class ClientHandlerG(threading.Thread):
     BUFFER_SIZE = 1024
     COUNTDOWN = 15
+
     def __init__(self, client_sock, player_id, event_hub):
         threading.Thread.__init__(self, name="client handler")
         self.sock = client_sock
@@ -32,6 +33,7 @@ class ClientHandlerG(threading.Thread):
             self.eh.ticking = False
             print("current score: ", self.eh.score)
             return
+
     def server_send_answer(self):
         self.eh.update_answer()
         if self.eh.drawer_id < self.eh.player_num:
@@ -70,12 +72,15 @@ class ClientHandlerG(threading.Thread):
                 self.start_time = pygame.time.get_ticks()
                 self.times_up = False
 
-            if eh_snap.get("correct") == False: 
-                self.time_passed = (pygame.time.get_ticks() - self.start_time)/1000     #time counter
+            if eh_snap.get("correct") == False:
+                self.time_passed = (pygame.time.get_ticks(
+                ) - self.start_time) / 1000  # time counter
 
             if self.time_passed < self.COUNTDOWN and eh_snap.get("correct") == False:
-                self.eh.count_down = math.trunc(self.COUNTDOWN - self.time_passed)
-                self.check_client_answer(eh_snap.get("client_answer")[str(self.player_id)])
+                self.eh.count_down = math.trunc(
+                    self.COUNTDOWN - self.time_passed)
+                self.check_client_answer(eh_snap.get(
+                    "client_answer")[str(self.player_id)])
                 self.update_can_draw()  # self.canDraw changed here.
                 self.update_eh_from_snap(eh_snap)  # depends on self.canDraw
             elif self.time_passed > 15:
@@ -96,8 +101,6 @@ class ClientHandlerG(threading.Thread):
                         self.eh.ticking = not eh_snap.get("ticking")
                         print(self.eh.ticking)
                         self.toggle_tick = True
-            
-            
 
     def update_can_draw(self):
         self.canDraw = (self.eh.drawer_id == self.player_id)

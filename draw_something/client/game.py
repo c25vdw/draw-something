@@ -8,8 +8,8 @@ from pathlib import Path
 from server.event_hub import EventHub
 from client.server_handler import ServerHandlerG as ServerHandler
 from client.settings import *
-from client.InfoScreen import InfoScreen
-
+from client.components.InfoScreen import InfoScreen
+from client.components.InputBox import InputBox
 
 class Game:
     """
@@ -17,6 +17,7 @@ class Game:
     """
     FPS = 60
     DISPLAY_TIMEOUT = 4000
+    
     def __init__(self):
         """
         svh: server_handler, initialized outside by client.
@@ -67,14 +68,15 @@ class Game:
         self.INPUT_BOX = pygame.Surface((INPUTBOXWIDTH, INPUTBOXHEIGHT))
         self.INPUT_BOX.fill(RED)
 
+        self.input_box = InputBox(self.screen, self.font_path_roboto)
+
     def _init_font(self):
         # resolve font file path
-        font_path_roboto = str(Path('./client/_fonts/Roboto.ttf').resolve())
-        font_path_luna = str(Path('./client/_fonts/Luna.ttf').resolve())
-        print(font_path_roboto, font_path_luna)
+        self.font_path_roboto = str(Path('./client/fonts/Roboto.ttf').resolve())
+        self.font_path_luna = str(Path('./client/fonts/Luna.ttf').resolve())
 
         self.font = pygame.font.Font(None, 48)
-        self.desc_font = pygame.font.Font(font_path_roboto, 16)
+        self.desc_font = pygame.font.Font(self.font_path_roboto, 16)
 
     def _init_svh(self):
         def get_ip_address():
@@ -147,13 +149,11 @@ class Game:
             self.eh.cur_pos = [(None, None), (None, None)]
 
         self._update_drawer_changed()  # draw depends on self.drawer_changed
+        self.input_box.update(self.eh.input_txt)
 
         if not self.drawer_changed and self.prev_answer != self.svh.answer:
             self.prev_answer = self.svh.answer  # cache the answer for previous round
-
-    def display_score(self):
-        pass
-
+        
     def _update_drawer_changed(self):
         self.eh.restart_timer = False
         if self.svh.drawer_id != self.prev_drawer_id:
@@ -176,11 +176,12 @@ class Game:
             self._draw_info_screen()
         else:
             self._draw_sketch()  # using svh.cur_pos values.
-            self.input_box = self._draw_text()  # using svh.input_txt
+            # self.input_box = self._draw_text()  # using svh.input_txt
+            self.input_box.draw()
             self.info_bar = self._draw_info_bar()
             self.screen.blit(self.info_bar,(0,0))
             self.screen.blit(self.canvas, (0, INFOBARHEIGHT))
-            self.screen.blit(self.input_box, (0, CANVASHEIGHT))
+            # self.screen.blit(self.input_box, (0, CANVASHEIGHT))
 
         pygame.display.flip()
 
