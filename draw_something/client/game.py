@@ -3,7 +3,7 @@ import pygame.gfxdraw
 import time
 import socket
 import random
-import math
+from pathlib import Path
 
 from server.event_hub import EventHub
 from client.server_handler import ServerHandlerG as ServerHandler
@@ -68,8 +68,13 @@ class Game:
         self.INPUT_BOX.fill(RED)
 
     def _init_font(self):
+        # resolve font file path
+        font_path_roboto = str(Path('./client/_fonts/Roboto.ttf').resolve())
+        font_path_luna = str(Path('./client/_fonts/Luna.ttf').resolve())
+        print(font_path_roboto, font_path_luna)
+
         self.font = pygame.font.Font(None, 48)
-        self.desc_font = pygame.font.Font("client\_fonts\Roboto.ttf", 16)
+        self.desc_font = pygame.font.Font(font_path_roboto, 16)
 
     def _init_svh(self):
         def get_ip_address():
@@ -79,7 +84,7 @@ class Game:
             return ip_addr
         local_addr = (get_ip_address(), random.randint(10000, 20000))
         # server_addr = (input("what is the server's ip address?>"), 12345)
-        server_addr = ("10.0.0.207", 12345)
+        server_addr = ("10.0.0.172", 12345)
 
         self.svh = ServerHandler(self.eh, local_addr, server_addr)
 
