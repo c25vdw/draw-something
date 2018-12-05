@@ -17,7 +17,6 @@ class Game:
     """
     FPS = 60
     DISPLAY_TIMEOUT = 4000
-
     def __init__(self):
         """
         svh: server_handler, initialized outside by client.
@@ -26,6 +25,7 @@ class Game:
         screen, font, svh, eh
         """
         pygame.init()
+        pygame.mixer.init()
         self._init_window()  # self.screen
         self._init_font()  # self.font
         self.eh = EventHub()
@@ -36,7 +36,7 @@ class Game:
         # event states
         self.mouse_down = False
         self.prevPos = (None, None)
-
+        self.running = True
         # for round change event
         self.drawer_changed = False
         self.prev_drawer_id = -1  # initialized in self.beforeloop()
@@ -97,7 +97,7 @@ class Game:
 
     def handle_pygame_event(self, event):
         if event.type == pygame.QUIT:
-            pygame.quit()
+            self.running = False
         elif not self.svh.canDraw and event.type == pygame.KEYDOWN:
             self._handle_keydown(event)
         elif event.type == pygame.MOUSEBUTTONDOWN or \
@@ -190,8 +190,13 @@ class Game:
         else:
             drawing_role = self.desc_font.render("Your turn to guess!",True, INFOBAR_TEXTCOLOR)
         formatted_time = str(self.svh.count_down).zfill(2)     #add leading 0 to single digit number
-        count_down = self.desc_font.render("00:{}".format(formatted_time), True, BLACK)
-
+        if self.svh.ticking == True:
+            self.eh.ticking = True
+            count_down = self.desc_font.render("00:{}".format(formatted_time), True, RED)
+        elif self.svh.ticking == False:
+            self.eh.ticking = False
+            count_down = self.desc_font.render("00:{}".format(formatted_time), True, BLACK)
+        
         self.info_bar = self.INFO_BAR.copy()
         self.info_bar.blit(drawing_role, (20,15))
         self.info_bar.blit(round_number, (500,15))

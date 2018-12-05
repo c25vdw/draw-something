@@ -21,6 +21,7 @@ class EventHub:
         }
         self.correct = False
         self.restart_timer = False
+        self.ticking = False
         self.count_down = 0
         # for server usage
         self.answer = ""
@@ -44,6 +45,7 @@ class EventHub:
             "answer": self.answer,
             "restart_timer": self.restart_timer,
             "count_down": self.count_down,
+            "ticking":self.ticking,
         })
 
     def flush_input_to_client_answer(self, player_id):

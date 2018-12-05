@@ -77,5 +77,6 @@ class ServerHandlerG(threading.Thread):
                 self.cur_ans_index = server_eh["cur_ans_index"]
                 self.entry_length = len(server_eh["selected_entry"])
                 self.count_down = server_eh["count_down"]
+                self.ticking = server_eh["ticking"]
             # print("drawer id: ", server_eh["drawer"], ". self id: ", self.player_id)
             self.sock.sendall(self.eh.to_json().encode())
