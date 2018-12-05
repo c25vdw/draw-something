@@ -53,6 +53,8 @@ class Game:
     def _init_components(self):
         self.INFO_BAR = pygame.Surface((INFOBARWIDTH,INFOBARHEIGHT))
         self.INFO_BAR.fill(INFOBARBG)
+        self.TIMER_BOX = self.INFO_BAR.subsurface((INFOBARWIDTH-TIMERBOXWIDTH)/2,(INFOBARHEIGHT-TIMERBOXHEIGHT)/2, TIMERBOXWIDTH,TIMERBOXHEIGHT)
+        self.TIMER_BOX.fill(WHITE)
 
         self.canvas = pygame.Surface((CANVASWIDTH, CANVASHEIGHT))
         self.canvas.fill(CANVASBG)
@@ -125,7 +127,7 @@ class Game:
 
             self.mouse_down = True
             (xp, yp) = pygame.mouse.get_pos()
-            self.prevPos = (xp + MARGIN * -1, yp - YOFFSET)
+            self.prevPos = (xp, yp - YOFFSET)
         elif event.type == pygame.MOUSEBUTTONUP:
             self.mouse_down = False
             print("mouse up")
@@ -134,8 +136,8 @@ class Game:
         if self.mouse_down:
             (x, y) = pygame.mouse.get_pos()
             # update local cursor position
-            self.eh.cur_pos = [(x + MARGIN * -1, y - YOFFSET), self.prevPos]
-            self.prevPos = (x + MARGIN * -1, y - YOFFSET)
+            self.eh.cur_pos = [(x, y - YOFFSET), self.prevPos]
+            self.prevPos = (x, y - YOFFSET)
         else:
             self.eh.cur_pos = [(None, None), (None, None)]
 
@@ -172,9 +174,8 @@ class Game:
             self.input_box = self._draw_text()  # using svh.input_txt
             self.info_bar = self._draw_info_bar()
             self.screen.blit(self.info_bar,(0,0))
-            self.screen.blit(self.canvas, (MARGIN, INFOBARHEIGHT))
-            self.screen.blit(
-                self.input_box, (MARGIN, CANVASHEIGHT + MARGIN))
+            self.screen.blit(self.canvas, (0, INFOBARHEIGHT))
+            self.screen.blit(self.input_box, (0, CANVASHEIGHT))
 
         pygame.display.flip()
 
@@ -184,11 +185,28 @@ class Game:
         self.info_screen.draw(self.prev_answer)
 
     def _draw_info_bar(self):
-        round_number = self.desc_font.render("Round: {}/{}".format(self.svh.cur_ans_index + 1,self.svh.entry_length), True, INFOBAR_TEXTCOLOR)
+        #drawing role
         if self.svh.canDraw:
             drawing_role = self.desc_font.render("Draw: {}".format(self.svh.answer),True, INFOBAR_TEXTCOLOR)
         else:
             drawing_role = self.desc_font.render("Your turn to guess!",True, INFOBAR_TEXTCOLOR)
+        #timer box
+        self.timer_box = self._draw_timer_box()
+        #round number
+        round_number = self.desc_font.render("Round: {}/{}".format(self.svh.cur_ans_index + 1,self.svh.entry_length), True, INFOBAR_TEXTCOLOR)
+        round_number_width = round_number.get_width()
+        #info bar copy
+        self.info_bar = self.INFO_BAR.copy()
+        #blitting onto info bar
+        self.info_bar.blit(drawing_role, (20,15))
+        self.info_bar.blit(round_number, (INFOBARWIDTH - round_number_width - 20,15))
+        self.info_bar.blit(self.timer_box,((INFOBARWIDTH-TIMERBOXWIDTH)/2,(INFOBARHEIGHT-TIMERBOXHEIGHT)/2))
+        #info bar bottom border
+        pygame.draw.rect(self.info_bar, INFOBAR_BORDERCOLOR, (0,INFOBARHEIGHT - INFOBAR_BORDERHEIGHT, INFOBAR_BORDERWIDTH, INFOBAR_BORDERHEIGHT), 0)
+        return self.info_bar
+
+    def _draw_timer_box(self):
+        self.timer_box = self.TIMER_BOX.copy()
         formatted_time = str(self.svh.count_down).zfill(2)     #add leading 0 to single digit number
         if self.svh.ticking == True:
             self.eh.ticking = True
@@ -196,13 +214,16 @@ class Game:
         elif self.svh.ticking == False:
             self.eh.ticking = False
             count_down = self.desc_font.render("00:{}".format(formatted_time), True, BLACK)
-        
-        self.info_bar = self.INFO_BAR.copy()
-        self.info_bar.blit(drawing_role, (20,15))
-        self.info_bar.blit(round_number, (500,15))
-        self.info_bar.blit(count_down, (300,15))
-        pygame.draw.rect(self.info_bar, INFOBAR_BORDERCOLOR, (0,INFOBARHEIGHT - INFOBAR_BORDERHEIGHT, INFOBAR_BORDERWIDTH, INFOBAR_BORDERHEIGHT), 0)
-        return self.info_bar
+        count_down_width = count_down.get_width()
+        count_down_height = count_down.get_height()
+        self.timer_box.blit(count_down, ((TIMERBOXWIDTH-count_down_width)/2,(TIMERBOXHEIGHT-count_down_height)/2))
+        self._draw_timer_box_border()
+        return self.timer_box
+
+    def _draw_timer_box_border(self):
+        pygame.draw.rect(self.timer_box, INFOBAR_BORDERCOLOR, (0,0,TIMERBOXWIDTH,TIMERBOX_BORDER),0)
+        pygame.draw.rect(self.timer_box, INFOBAR_BORDERCOLOR, (0,0,TIMERBOX_BORDER,TIMERBOXHEIGHT),0)
+
     def _draw_sketch(self):
         if self.svh.cur_pos != [[None, None], [None, None]]:
             p = self.svh.cur_pos
