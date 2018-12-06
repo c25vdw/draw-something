@@ -4,12 +4,6 @@ import pygame
 import math
 from time import sleep
 
-
-def empty_answer(client_answer):
-    for answer in client_answer:
-        client_answer[answer] = ""
-
-
 class ClientHandlerG(threading.Thread):
     BUFFER_SIZE = 1024
     COUNTDOWN = 15

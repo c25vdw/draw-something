@@ -85,8 +85,8 @@ class Game:
             ip_addr = s.getsockname()[0]
             return ip_addr
         local_addr = (get_ip_address(), random.randint(10000, 20000))
-        # server_addr = (input("what is the server's ip address?>"), 12345)
-        server_addr = ("10.0.0.172", 12345)
+        # server_addr = (input("What is the server's ip address?>"), 12345)
+        server_addr = ("10.0.0.207", 12345)
 
         self.svh = ServerHandler(self.eh, local_addr, server_addr)
 
@@ -160,12 +160,15 @@ class Game:
             self.drawer_changed = True
             self.drawer_changed_timestamp = pygame.time.get_ticks()
         if self.drawer_changed:
-            self.eh.correct = True
-            time_past = pygame.time.get_ticks() - self.drawer_changed_timestamp
-            if time_past > self.info_screen.timeout:
-                self.drawer_changed = False
-                self.eh.restart_timer = True
-                self.eh.correct = False
+            if not self.svh.end_game:
+                self.eh.correct = True
+                time_past = pygame.time.get_ticks() - self.drawer_changed_timestamp
+                if time_past > self.info_screen.timeout:
+                    self.drawer_changed = False
+                    self.eh.restart_timer = True
+                    self.eh.correct = False
+            elif self.svh.end_game:
+                self.eh.correct = True
 
         self.prev_drawer_id = self.svh.drawer_id
 
@@ -246,5 +249,4 @@ class Game:
         if self.svh.cur_pos != [[None, None], [None, None]]:
             p = self.svh.cur_pos
             for i in range(0, 9):
-                pygame.draw.aaline(self.canvas, self.svh.color, (p[0][0] + self.matrix[i][0], p[0][1] +
-                                                                 self.matrix[i][1]), (p[1][0] + self.matrix[i][0], p[1][1] + self.matrix[i][1]), 1)
+                pygame.draw.aaline(self.canvas, self.svh.color,(p[0][0] + self.matrix[i][0], p[0][1] + self.matrix[i][1]), (p[1][0] + self.matrix[i][0], p[1][1] + self.matrix[i][1]) , 1)

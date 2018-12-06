@@ -39,7 +39,7 @@ class InfoScreen:
         self.answer_surface.fill(YELLOW_1)
 
         answer_txt_surface = self.answer_font.render(
-            "the answer was " + str(answer), True, BLACK)
+            "The answer was " + str(answer), True, BLACK)
         self.answer_surface.blit(answer_txt_surface, (0, self.height // 6))
 
     def _render_score_txt_surfaces(self):
@@ -51,7 +51,7 @@ class InfoScreen:
 
         for key, val in self.svh.score.items():
             line = self.font.render(
-                "player{}: {}".format(key, val), True, BLACK)
+                "Player {}: {}".format(key, val), True, BLACK)
             score_text_surfaces.append(line)
 
         return score_text_surfaces

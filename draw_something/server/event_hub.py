@@ -25,7 +25,7 @@ class EventHub:
         self.count_down = 0
         # for server usage
         self.answer = ""
-        self.pause_game = False  # later
+        self.end_game = False 
         self.prev_upload_id = self.drawer_id
 
         # NOTICE: more attributes might be implicitely inserted by game server or client handler. like answer_stream or so.
@@ -46,6 +46,7 @@ class EventHub:
             "restart_timer": self.restart_timer,
             "count_down": self.count_down,
             "ticking":self.ticking,
+            "end_game":self.end_game,
         })
 
     def flush_input_to_client_answer(self, player_id):
@@ -63,10 +64,10 @@ class EventHub:
             print("server answer is now {}".format(self.answer))
         elif (self.answer == client_answer and self.cur_ans_index == len(self.selected_entry) - 1):
             isCorrect = True
-            self.cur_ans_index = 0
-            self.answer = self.selected_entry[self.cur_ans_index]
+            self.end_game = True
+            self.answer = None
             self.client_answer[str(player_id)] = ""
-            print("server answer is now {}".format(self.answer))
+
         return isCorrect
 
     def update_answer(self):
@@ -74,5 +75,6 @@ class EventHub:
             self.cur_ans_index += 1
             self.answer = self.selected_entry[self.cur_ans_index]
         elif (self.cur_ans_index == len(self.selected_entry) - 1):
-            self.cur_ans_index = 0
-            self.answer = self.selected_entry[self.cur_ans_index]
+            self.end_game = True
+            self.answer = None
+            self.client_answer[str(player_id)] = ""
