@@ -112,6 +112,11 @@ class ClientHandlerG(threading.Thread):
                 self.compute_winner()
                 self.should_compute_winner = False
 
+            if self.canDraw and eh_snap.get("clear_clicked"):
+                self.eh.clear_screen = True
+            elif self.canDraw and not eh_snap.get("clear_clicked"):
+                self.eh.clear_screen = False
+                
     def update_can_draw(self):
         self.canDraw = (self.eh.drawer_id == self.player_id)
 

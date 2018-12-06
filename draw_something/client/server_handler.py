@@ -70,6 +70,8 @@ class ServerHandlerG(threading.Thread):
                 # array(tuple(2), tuple(2))
                 self.cur_pos = server_eh["cur_pos"]
                 self.color = server_eh["color"]  # array(3)
+                self.clear_screen = server_eh["clear_screen"]
+                self.clear_clicked = server_eh["clear_clicked"]
                 # self.score = server_eh["score"] # later
                 self.client_answer = server_eh["client_answer"]
                 self.input_txt = server_eh["input_txt"]  # later

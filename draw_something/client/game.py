@@ -59,6 +59,13 @@ class Game:
             (INFOBARWIDTH - TIMERBOXWIDTH) / 2, (INFOBARHEIGHT - TIMERBOXHEIGHT) / 2, TIMERBOXWIDTH, TIMERBOXHEIGHT)
         self.TIMER_BOX.fill(WHITE)
 
+        self.clear_button = pygame.Surface((TIMERBOXHEIGHT,TIMERBOXHEIGHT))
+        self.clear_button.fill(INFOBAR_BORDERCOLOR)
+        self.clear_button_rect = pygame.Rect((INFOBARWIDTH + TIMERBOXWIDTH) / 2 + 30,(INFOBARHEIGHT - TIMERBOXHEIGHT) / 2,TIMERBOXHEIGHT,TIMERBOXHEIGHT)
+        icon = pygame.image.load("client/image/eraser.png")
+        icon = pygame.transform.scale(icon, (TIMERBOXHEIGHT - 10, TIMERBOXHEIGHT - 10))
+        self.clear_button.blit(icon,(3,3))
+
         self.canvas = pygame.Surface((CANVASWIDTH, CANVASHEIGHT))
         self.canvas.fill(CANVASBG)
         # self.info_screen = pygame.Surface((SCREENWIDTH, SCREENHEIGHT))
@@ -85,8 +92,8 @@ class Game:
             ip_addr = s.getsockname()[0]
             return ip_addr
         local_addr = (get_ip_address(), random.randint(10000, 20000))
-        # server_addr = (input("What is the server's ip address?>"), 12345)
-        server_addr = ("10.0.0.207", 12345)
+        server_addr = (input("What is the server's ip address?>"), 12345)
+        # server_addr = ("10.0.0.207", 12345)
 
         self.svh = ServerHandler(self.eh, local_addr, server_addr)
 
@@ -129,12 +136,14 @@ class Game:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 self.eh.color = BLACK
-            elif event.button == 3:
-                self.eh.color = CANVASBG
-
             self.mouse_down = True
             (xp, yp) = pygame.mouse.get_pos()
             self.prevPos = (xp, yp - YOFFSET)
+            if self.svh.canDraw and xp >= self.clear_button_rect.left and xp <= self.clear_button_rect.right and yp >= self.clear_button_rect.top and yp <= self.clear_button_rect.bottom:
+                print("clicked erase")
+                self.eh.clear_clicked = True
+                time.sleep(0.1)
+                self.eh.clear_clicked = False
         elif event.type == pygame.MOUSEBUTTONUP:
             self.mouse_down = False
             print("mouse up")
@@ -150,7 +159,8 @@ class Game:
 
         self._update_drawer_changed()  # draw depends on self.drawer_changed
         self.input_box.update(self.eh.input_txt)
-
+        if self.svh.clear_screen:
+            self.canvas.fill(CANVASBG)
         if not self.drawer_changed and self.prev_answer != self.svh.answer:
             self.prev_answer = self.svh.answer  # cache the answer for previous round
 
@@ -180,12 +190,11 @@ class Game:
         else:
             self._draw_sketch()  # using svh.cur_pos values.
 
-            self.info_bar = self._draw_info_bar()
+            self.info_bar = self._draw_info_bar()                             
             self.screen.blit(self.info_bar, (0, 0))
             self.screen.blit(self.canvas, (0, INFOBARHEIGHT))
             if not self.svh.canDraw:
                 self.input_box.draw()
-
         pygame.display.flip()
 
     def _draw_info_screen(self):
@@ -207,9 +216,13 @@ class Game:
         round_number = self.desc_font.render(
             "Round: {}/{}".format(self.svh.cur_ans_index + 1, self.svh.entry_length), True, INFOBAR_TEXTCOLOR)
         round_number_width = round_number.get_width()
+
         # info bar copy
         self.info_bar = self.INFO_BAR.copy()
+
         # blitting onto info bar
+        if self.svh.canDraw:
+            self.info_bar.blit(self.clear_button,((INFOBARWIDTH + TIMERBOXWIDTH) / 2 + 30,(INFOBARHEIGHT - TIMERBOXHEIGHT) / 2))
         self.info_bar.blit(drawing_role, (20, 15))
         self.info_bar.blit(round_number, (INFOBARWIDTH -
                                           round_number_width - 20, 15))
@@ -243,8 +256,9 @@ class Game:
         pygame.draw.rect(self.timer_box, INFOBAR_BORDERCOLOR,
                          (0, 0, TIMERBOXWIDTH, TIMERBOX_BORDER), 0)
         pygame.draw.rect(self.timer_box, INFOBAR_BORDERCOLOR,
-                         (0, 0, TIMERBOX_BORDER, TIMERBOXHEIGHT), 0)
+                         (0, 0, TIMERBOX_BORDER, TIMERBOXHEIGHT), 0)        
 
+        #(INFOBARWIDTH + TIMERBOXWIDTH) / 2 + 30,(INFOBARHEIGHT - TIMERBOXHEIGHT) / 2
     def _draw_sketch(self):
         if self.svh.cur_pos != [[None, None], [None, None]]:
             p = self.svh.cur_pos
