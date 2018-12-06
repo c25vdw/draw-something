@@ -92,7 +92,10 @@ def decompress(compressed, uncompressed):
         sys.exit(1)
 
     # closing uncompressed will trigger an error in http server.
-    uncompressed_bytes = uncompressed.getvalue()
+    try:
+        uncompressed_bytes = uncompressed.getvalue()
+    except AttributeError:
+        uncompressed_bytes = ""
     compressed.close()
     uncompressed.close()
     return uncompressed_bytes
