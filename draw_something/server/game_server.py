@@ -50,8 +50,8 @@ class GameServerG:
         '''
         hh = HuffmanHandler()
         self.eh.entries = hh.get_entries()
-        # self._choose_random_entry()
-        self._choose_entry_from_level()
+        # self.choose_random_entry()
+        self.choose_entry_from_level()
 
     def init_eh_score(self):
         score = {}
@@ -67,13 +67,14 @@ class GameServerG:
         self.sock_for_setup.bind((self.ip, 12345))
 
         self.sock_for_setup.listen(self.player_num)  # listens on public:12345
-        print("listening for {} clients on address: {}".format(
+        print("listening for {} clients on: {}".format(
             self.player_num, (self.ip, '12345')))
 
-    def _choose_entry_from_level(self):
+    def choose_entry_from_level(self):
         self.eh.selected_entry = self.eh.entries[str(self.level)]
+        # self.eh.selected_entry = ["cat","dog"]
 
-    def _choose_random_entry(self):
+    def choose_random_entry(self):
         entriesLen = len(self.eh.entries)
         chosenEntry = str(random.randint(1, entriesLen))
         self.eh.selected_entry = self.eh.entries[chosenEntry]
@@ -102,7 +103,7 @@ class GameServerG:
             print(player)
 
         # sleep so that client don't receive data mixed together.
-        sleep(1)
+        sleep(0.5)
         for ch in self.ch_list:
             ch.start()
 

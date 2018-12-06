@@ -30,7 +30,7 @@ class ServerHandlerG(threading.Thread):
         self.ip = ip
         self.server_ip = server_ip
         self.sock = socket.socket()
-        print("client ipi: ~~~~~~~~~~~~~~~~~~~~~~`", self.ip)
+        print("client ip: ", self.ip)
         self.sock.bind(self.ip)
         self.player_id = 0
 
@@ -44,10 +44,7 @@ class ServerHandlerG(threading.Thread):
         self.input_txt = None
 
     def run(self):
-        try:
-            self.sock.connect(self.server_ip)
-        except:
-            self.sock.connect((self.server_ip[0], 12346))
+        self.sock.connect(self.server_ip)
 
         # waits for player_id
         player_id_raw = self.sock.recv(self.BUFFER_SIZE)
@@ -79,5 +76,7 @@ class ServerHandlerG(threading.Thread):
                 self.entry_length = len(server_eh["selected_entry"])
                 self.count_down = server_eh["count_down"]
                 self.ticking = server_eh["ticking"]
+                self.end_game = server_eh["end_game"]
+                self.winner = server_eh["winner"]
             # print("drawer id: ", server_eh["drawer"], ". self id: ", self.player_id)
             self.sock.sendall(self.eh.to_json().encode())

@@ -28,12 +28,12 @@ class Game:
         """
         pygame.init()
         pygame.mixer.init()
-        self._init_window()  # self.screen
-        self._init_font()  # self.font
+        self.init_window()  # self.screen
+        self.init_font()  # self.font
         self.eh = EventHub()
-        self._init_svh()  # self.svh
-        self._init_components()  # self.canvas, toolbar and INPUT_BOX
-        self._init_matrix_for_brush()
+        self.init_svh()  # self.svh
+        self.init_components()  # self.canvas, toolbar and INPUT_BOX
+        self.init_matrix_for_brush()
         # self.input = Text(400, 60, self.font, (WIDTH/2, HEIGHT/2))
         # event states
         self.mouse_down = False
@@ -45,14 +45,14 @@ class Game:
         self.drawer_changed_timestamp = pygame.time.get_ticks()
         self.prev_answer = ""
 
-    def _init_window(self):
+    def init_window(self):
         self.screen = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT))
         self.screen.fill(SCREENBG)
         pygame.display.set_caption("Draw something!")
         # may be draw something here.
         pygame.display.flip()
 
-    def _init_components(self):
+    def init_components(self):
         self.INFO_BAR = pygame.Surface((INFOBARWIDTH, INFOBARHEIGHT))
         self.INFO_BAR.fill(INFOBARBG)
         self.TIMER_BOX = self.INFO_BAR.subsurface(
@@ -65,11 +65,11 @@ class Game:
         # self.info_screen.fill(YELLOW_1)
 
         self.info_screen = InfoScreen(
-            SCREENWIDTH, SCREENHEIGHT, self.screen, self.svh, timeout=self.DISPLAY_TIMEOUT)
+            SCREENWIDTH, SCREENHEIGHT, self.screen, self.svh, self.font_path_roboto, timeout=self.DISPLAY_TIMEOUT)
 
         self.input_box = InputBox(self.screen, self.font_path_roboto)
 
-    def _init_font(self):
+    def init_font(self):
         # resolve font file path
         self.font_path_roboto = str(
             Path('./client/fonts/Roboto.ttf').resolve())
@@ -78,19 +78,20 @@ class Game:
         self.font = pygame.font.Font(None, 48)
         self.desc_font = pygame.font.Font(self.font_path_roboto, 16)
 
-    def _init_svh(self):
+    def init_svh(self):
         def get_ip_address():
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.connect(("8.8.8.8", 80))
             ip_addr = s.getsockname()[0]
             return ip_addr
         local_addr = (get_ip_address(), random.randint(10000, 20000))
-        # server_addr = (input("what is the server's ip address?>"), 12345)
-        server_addr = (input("server address:"), 12345)
+        # server_addr = (input("What is the server's ip address?>"), 12345)
+        server_addr = (input("what is your server's ip address? >"), 12345)
 
         self.svh = ServerHandler(self.eh, local_addr, server_addr)
 
-    def _init_matrix_for_brush(self):
+    def init_matrix_for_brush(self):
+        # a brush dot is made of a 9 pixels matrix
         self.matrix = []
         x, y = -1, 1
         for i in range(0, 3):
@@ -108,12 +109,12 @@ class Game:
         if event.type == pygame.QUIT:
             self.running = False
         elif not self.svh.canDraw and event.type == pygame.KEYDOWN:
-            self._handle_keydown(event)
+            self.handle_keydown(event)
         elif event.type == pygame.MOUSEBUTTONDOWN or \
                 event.type == pygame.MOUSEBUTTONUP:
-            self._handle_mouse_up_down(event)
+            self.handle_mouse_up_down(event)
 
-    def _handle_keydown(self, event):
+    def handle_keydown(self, event):
         if event.key == pygame.K_RETURN:
             self.eh.flush_input_to_client_answer(self.svh.player_id)
             time.sleep(0.1)
@@ -125,7 +126,7 @@ class Game:
             self.eh.input_txt += event.unicode
         print("input> {}".format(self.eh.input_txt))
 
-    def _handle_mouse_up_down(self, event):
+    def handle_mouse_up_down(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 self.eh.color = BLACK
@@ -148,24 +149,27 @@ class Game:
         else:
             self.eh.cur_pos = [(None, None), (None, None)]
 
-        self._update_drawer_changed()  # draw depends on self.drawer_changed
+        self.update_drawer_changed()  # draw depends on self.drawer_changed
         self.input_box.update(self.eh.input_txt)
 
         if not self.drawer_changed and self.prev_answer != self.svh.answer:
             self.prev_answer = self.svh.answer  # cache the answer for previous round
 
-    def _update_drawer_changed(self):
+    def update_drawer_changed(self):
         self.eh.restart_timer = False
         if self.svh.drawer_id != self.prev_drawer_id:
             self.drawer_changed = True
             self.drawer_changed_timestamp = pygame.time.get_ticks()
         if self.drawer_changed:
-            self.eh.correct = True
-            time_past = pygame.time.get_ticks() - self.drawer_changed_timestamp
-            if time_past > self.info_screen.timeout:
-                self.drawer_changed = False
-                self.eh.restart_timer = True
-                self.eh.correct = False
+            if not self.svh.end_game:
+                self.eh.correct = True
+                time_past = pygame.time.get_ticks() - self.drawer_changed_timestamp
+                if time_past > self.info_screen.timeout:
+                    self.drawer_changed = False
+                    self.eh.restart_timer = True
+                    self.eh.correct = False
+            elif self.svh.end_game:
+                self.eh.correct = True
 
         self.prev_drawer_id = self.svh.drawer_id
 
@@ -173,24 +177,26 @@ class Game:
         self.screen.fill(SCREENBG)
         if self.drawer_changed:
             self.canvas.fill(CANVASBG)
-            self._draw_info_screen()
+            self.draw_info_screen()
         else:
-            self._draw_sketch()  # using svh.cur_pos values.
-
-            self.info_bar = self._draw_info_bar()
-            self.screen.blit(self.info_bar, (0, 0))
+            self.draw_sketch()  # using svh.cur_pos values.
+            self.draw_info_bar()
             self.screen.blit(self.canvas, (0, INFOBARHEIGHT))
-            if not self.svh.canDraw:
-                self.input_box.draw()
+            self.draw_input_box()
 
         pygame.display.flip()
 
-    def _draw_info_screen(self):
+    def draw_info_screen(self):
         # self.screen.fill(WHITE)
         # self.screen.blit(self.info_screen, (0, 0))
-        self.info_screen.draw(self.prev_answer)
+        self.info_screen.draw(
+            self.prev_answer, self.svh.end_game, self.svh.winner)
 
-    def _draw_info_bar(self):
+    def draw_input_box(self):
+        if not self.svh.canDraw:
+            self.input_box.draw()
+
+    def draw_info_bar(self):
         # drawing role
         if self.svh.canDraw:
             drawing_role = self.desc_font.render(
@@ -215,7 +221,7 @@ class Game:
         # info bar bottom border
         pygame.draw.rect(self.info_bar, INFOBAR_BORDERCOLOR, (0, INFOBARHEIGHT -
                                                               INFOBAR_BORDERHEIGHT, INFOBAR_BORDERWIDTH, INFOBAR_BORDERHEIGHT), 0)
-        return self.info_bar
+        self.screen.blit(self.info_bar, (0, 0))
 
     def _draw_timer_box(self):
         self.timer_box = self.TIMER_BOX.copy()
@@ -242,7 +248,7 @@ class Game:
         pygame.draw.rect(self.timer_box, INFOBAR_BORDERCOLOR,
                          (0, 0, TIMERBOX_BORDER, TIMERBOXHEIGHT), 0)
 
-    def _draw_sketch(self):
+    def draw_sketch(self):
         if self.svh.cur_pos != [[None, None], [None, None]]:
             p = self.svh.cur_pos
             for i in range(0, 9):
