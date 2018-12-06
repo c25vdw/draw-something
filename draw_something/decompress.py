@@ -1,7 +1,7 @@
 import sys
-sys.path.append('./huffman')
 
-import util
+# import server.huffman.util as util
+from server.huffman import util
 
 
 def run_decompressor(compressed, decompress_to):

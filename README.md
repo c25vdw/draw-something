@@ -1,15 +1,17 @@
 # draw-something
-draw something, running on private connection between two laptops!
+draw something with your LAN friends!
+
+This is a draw-something game running on LAN, built using pygame and socket(TCP).
 
 ### construction sequence
 
-1. game object, client's game actions object.
+- [x] game object, client's game actions object.
 
-2. server handler, client handler and game server.
+- [x] server handler, client handler and game server.
 
 ### milestones
 
-1. by the end of this week: (after weekend)
+1. by the end of the first week: (after weekend)
 
     - either can draw and the other will see, vise versa
 
@@ -17,9 +19,15 @@ draw something, running on private connection between two laptops!
 
     - guessing, round and difficulty.
 
+3. better UI
+    
+    - countdown, input box and screen showing scores.
+
 ### Usage
 
-you will need one server and two clients(players) setup, you can host the server with one of the client on the same ip.
+1. connect all players(laptops) under LAN, each with a local ip address starting with `192`.
+2. `python run_server.py` to start a server. you will need to choose one player(laptop) to host the server.
+3. `python run_client.py` to start a player. (the number of player is not limiting, but should equal to the input number given to server).
 
-to run client: python run_clilent.py
-to run server: python run_server.py
+---
+this project is a team of two project, done for University of Alberta CMPUT274 final project.
