@@ -6,6 +6,7 @@ this should only be called by ../run_client.py
 
 def run():
     import pygame
+    import sys
     from client.game import Game
     g = Game()
     clock = pygame.time.Clock()
@@ -20,3 +21,4 @@ def run():
         g.draw()
 
     pygame.quit()
+    sys.exit(0)

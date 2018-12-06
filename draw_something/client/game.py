@@ -11,13 +11,14 @@ from client.settings import *
 from client.components.InfoScreen import InfoScreen
 from client.components.InputBox import InputBox
 
+
 class Game:
     """
     there should be the pygame while loop wrapping this.
     """
     FPS = 60
     DISPLAY_TIMEOUT = 4000
-    
+
     def __init__(self):
         """
         svh: server_handler, initialized outside by client.
@@ -52,9 +53,10 @@ class Game:
         pygame.display.flip()
 
     def _init_components(self):
-        self.INFO_BAR = pygame.Surface((INFOBARWIDTH,INFOBARHEIGHT))
+        self.INFO_BAR = pygame.Surface((INFOBARWIDTH, INFOBARHEIGHT))
         self.INFO_BAR.fill(INFOBARBG)
-        self.TIMER_BOX = self.INFO_BAR.subsurface((INFOBARWIDTH-TIMERBOXWIDTH)/2,(INFOBARHEIGHT-TIMERBOXHEIGHT)/2, TIMERBOXWIDTH,TIMERBOXHEIGHT)
+        self.TIMER_BOX = self.INFO_BAR.subsurface(
+            (INFOBARWIDTH - TIMERBOXWIDTH) / 2, (INFOBARHEIGHT - TIMERBOXHEIGHT) / 2, TIMERBOXWIDTH, TIMERBOXHEIGHT)
         self.TIMER_BOX.fill(WHITE)
 
         self.canvas = pygame.Surface((CANVASWIDTH, CANVASHEIGHT))
@@ -65,14 +67,12 @@ class Game:
         self.info_screen = InfoScreen(
             SCREENWIDTH, SCREENHEIGHT, self.screen, self.svh, timeout=self.DISPLAY_TIMEOUT)
 
-        self.INPUT_BOX = pygame.Surface((INPUTBOXWIDTH, INPUTBOXHEIGHT))
-        self.INPUT_BOX.fill(RED)
-
         self.input_box = InputBox(self.screen, self.font_path_roboto)
 
     def _init_font(self):
         # resolve font file path
-        self.font_path_roboto = str(Path('./client/fonts/Roboto.ttf').resolve())
+        self.font_path_roboto = str(
+            Path('./client/fonts/Roboto.ttf').resolve())
         self.font_path_luna = str(Path('./client/fonts/Luna.ttf').resolve())
 
         self.font = pygame.font.Font(None, 48)
@@ -92,11 +92,11 @@ class Game:
 
     def _init_matrix_for_brush(self):
         self.matrix = []
-        x,y=-1,1
-        for i in range(0,3):
-            for j in range(0,3):
-                self.matrix.append([x+j,y])
-            y -=1
+        x, y = -1, 1
+        for i in range(0, 3):
+            for j in range(0, 3):
+                self.matrix.append([x + j, y])
+            y -= 1
 
     def before_loop(self):
         self.svh.start()
@@ -153,7 +153,7 @@ class Game:
 
         if not self.drawer_changed and self.prev_answer != self.svh.answer:
             self.prev_answer = self.svh.answer  # cache the answer for previous round
-        
+
     def _update_drawer_changed(self):
         self.eh.restart_timer = False
         if self.svh.drawer_id != self.prev_drawer_id:
@@ -176,12 +176,12 @@ class Game:
             self._draw_info_screen()
         else:
             self._draw_sketch()  # using svh.cur_pos values.
-            # self.input_box = self._draw_text()  # using svh.input_txt
-            self.input_box.draw()
+
             self.info_bar = self._draw_info_bar()
-            self.screen.blit(self.info_bar,(0,0))
+            self.screen.blit(self.info_bar, (0, 0))
             self.screen.blit(self.canvas, (0, INFOBARHEIGHT))
-            # self.screen.blit(self.input_box, (0, CANVASHEIGHT))
+            if not self.svh.canDraw:
+                self.input_box.draw()
 
         pygame.display.flip()
 
@@ -191,57 +191,60 @@ class Game:
         self.info_screen.draw(self.prev_answer)
 
     def _draw_info_bar(self):
-        #drawing role
+        # drawing role
         if self.svh.canDraw:
-            drawing_role = self.desc_font.render("Draw: {}".format(self.svh.answer),True, INFOBAR_TEXTCOLOR)
+            drawing_role = self.desc_font.render(
+                "Draw: {}".format(self.svh.answer), True, INFOBAR_TEXTCOLOR)
         else:
-            drawing_role = self.desc_font.render("Your turn to guess!",True, INFOBAR_TEXTCOLOR)
-        #timer box
+            drawing_role = self.desc_font.render(
+                "Your turn to guess!", True, INFOBAR_TEXTCOLOR)
+        # timer box
         self.timer_box = self._draw_timer_box()
-        #round number
-        round_number = self.desc_font.render("Round: {}/{}".format(self.svh.cur_ans_index + 1,self.svh.entry_length), True, INFOBAR_TEXTCOLOR)
+        # round number
+        round_number = self.desc_font.render(
+            "Round: {}/{}".format(self.svh.cur_ans_index + 1, self.svh.entry_length), True, INFOBAR_TEXTCOLOR)
         round_number_width = round_number.get_width()
-        #info bar copy
+        # info bar copy
         self.info_bar = self.INFO_BAR.copy()
-        #blitting onto info bar
-        self.info_bar.blit(drawing_role, (20,15))
-        self.info_bar.blit(round_number, (INFOBARWIDTH - round_number_width - 20,15))
-        self.info_bar.blit(self.timer_box,((INFOBARWIDTH-TIMERBOXWIDTH)/2,(INFOBARHEIGHT-TIMERBOXHEIGHT)/2))
-        #info bar bottom border
-        pygame.draw.rect(self.info_bar, INFOBAR_BORDERCOLOR, (0,INFOBARHEIGHT - INFOBAR_BORDERHEIGHT, INFOBAR_BORDERWIDTH, INFOBAR_BORDERHEIGHT), 0)
+        # blitting onto info bar
+        self.info_bar.blit(drawing_role, (20, 15))
+        self.info_bar.blit(round_number, (INFOBARWIDTH -
+                                          round_number_width - 20, 15))
+        self.info_bar.blit(self.timer_box, ((
+            INFOBARWIDTH - TIMERBOXWIDTH) / 2, (INFOBARHEIGHT - TIMERBOXHEIGHT) / 2))
+        # info bar bottom border
+        pygame.draw.rect(self.info_bar, INFOBAR_BORDERCOLOR, (0, INFOBARHEIGHT -
+                                                              INFOBAR_BORDERHEIGHT, INFOBAR_BORDERWIDTH, INFOBAR_BORDERHEIGHT), 0)
         return self.info_bar
 
     def _draw_timer_box(self):
         self.timer_box = self.TIMER_BOX.copy()
-        formatted_time = str(self.svh.count_down).zfill(2)     #add leading 0 to single digit number
+        formatted_time = str(self.svh.count_down).zfill(
+            2)  # add leading 0 to single digit number
         if self.svh.ticking == True:
             self.eh.ticking = True
-            count_down = self.desc_font.render("00:{}".format(formatted_time), True, RED)
+            count_down = self.desc_font.render(
+                "00:{}".format(formatted_time), True, RED)
         elif self.svh.ticking == False:
             self.eh.ticking = False
-            count_down = self.desc_font.render("00:{}".format(formatted_time), True, BLACK)
+            count_down = self.desc_font.render(
+                "00:{}".format(formatted_time), True, BLACK)
         count_down_width = count_down.get_width()
         count_down_height = count_down.get_height()
-        self.timer_box.blit(count_down, ((TIMERBOXWIDTH-count_down_width)/2,(TIMERBOXHEIGHT-count_down_height)/2))
+        self.timer_box.blit(count_down, ((
+            TIMERBOXWIDTH - count_down_width) / 2, (TIMERBOXHEIGHT - count_down_height) / 2))
         self._draw_timer_box_border()
         return self.timer_box
 
     def _draw_timer_box_border(self):
-        pygame.draw.rect(self.timer_box, INFOBAR_BORDERCOLOR, (0,0,TIMERBOXWIDTH,TIMERBOX_BORDER),0)
-        pygame.draw.rect(self.timer_box, INFOBAR_BORDERCOLOR, (0,0,TIMERBOX_BORDER,TIMERBOXHEIGHT),0)
+        pygame.draw.rect(self.timer_box, INFOBAR_BORDERCOLOR,
+                         (0, 0, TIMERBOXWIDTH, TIMERBOX_BORDER), 0)
+        pygame.draw.rect(self.timer_box, INFOBAR_BORDERCOLOR,
+                         (0, 0, TIMERBOX_BORDER, TIMERBOXHEIGHT), 0)
 
     def _draw_sketch(self):
         if self.svh.cur_pos != [[None, None], [None, None]]:
             p = self.svh.cur_pos
-            for i in range(0,9):
-                pygame.draw.aaline(self.canvas, self.svh.color,(p[0][0] + self.matrix[i][0],p[0][1]+self.matrix[i][1]), (p[1][0]+ self.matrix[i][0],p[1][1]+self.matrix[i][1]),1)
-
-            # pygame.draw.line(self.canvas, self.svh.color,p[0], p[1], LINEWIDTH)
-            # pygame.draw.circle(self.canvas, self.svh.color,p[1], BRUSHRADIUS, 0)
-
-    def _draw_text(self):
-        # create a new copy of texts
-        txt_surface = self.font.render(self.eh.input_txt, True, BLACK)
-        self.input_box = self.INPUT_BOX.copy()
-        self.input_box.blit(txt_surface, (0, 0))
-        return self.input_box
+            for i in range(0, 9):
+                pygame.draw.aaline(self.canvas, self.svh.color, (p[0][0] + self.matrix[i][0], p[0][1] +
+                                                                 self.matrix[i][1]), (p[1][0] + self.matrix[i][0], p[1][1] + self.matrix[i][1]), 1)

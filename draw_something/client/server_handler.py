@@ -25,6 +25,7 @@ class ServerHandlerG(threading.Thread):
 
     def __init__(self, event_hub, ip, server_ip):
         threading.Thread.__init__(self, name="server handler")
+        self.daemon = True
         self.eh = event_hub
         self.ip = ip
         self.server_ip = server_ip

@@ -10,7 +10,7 @@ class InputBox:
         self.screen = screen
         self.container = pygame.Surface((100, 60))
 
-        self.font = pygame.font.Font(font_path, 32)
+        self.font = pygame.font.Font(font_path, 24)
         self.txt_surface = pygame.Surface((80, 40))
         self.default_txt = "..."
         self.txt = ""
