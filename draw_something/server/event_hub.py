@@ -7,6 +7,8 @@ class EventHub:
         # local events
         self.cur_pos = [(None, None), (None, None)]
         self.color = (0, 0, 0)
+        self.clear_screen = False
+        self.clear_clicked = False
         self.drawer_id = 1
         self.player_num = 0
         self.input_txt = ""
@@ -35,6 +37,8 @@ class EventHub:
         return json.dumps({
             "cur_pos": [self.cur_pos[0], self.cur_pos[1]],
             "color": [self.color[0], self.color[1], self.color[2]],
+            "clear_screen": self.clear_screen,
+            "clear_clicked": self.clear_clicked,
             "drawer_id": self.drawer_id,
             "cur_ans_index": self.cur_ans_index,
             "score": self.score,

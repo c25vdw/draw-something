@@ -72,7 +72,6 @@ class GameServerG:
 
     def choose_entry_from_level(self):
         self.eh.selected_entry = self.eh.entries[str(self.level)]
-        # self.eh.selected_entry = ["cat","dog"]
 
     def choose_random_entry(self):
         entriesLen = len(self.eh.entries)
