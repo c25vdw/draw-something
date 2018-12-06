@@ -18,6 +18,9 @@ def get_ip_address():
 class GameServerG:
     def __init__(self):
         self.player_num = int(input("Enter number of players: "))
+        if self.player_num < 2:
+            print("should be a integer larger than 1.")
+            sys.exit(1)
         self.level = self.get_level(default=2)
         print("level is: ", self.level)
         self.ch_list = []
@@ -96,7 +99,7 @@ class GameServerG:
         # set up connection, initialize two client_handler that takes the incoming socket and does updatings.
         # 1. send the client socket their id
         for player in range(1, self.player_num + 1):
-            (client_sock, client_ip) = self.sock_for_setup.accept()
+            (client_sock, _) = self.sock_for_setup.accept()
             ch = ClientHandler(client_sock, player, self.eh)
             self.ch_list.append(ch)
             print(player)

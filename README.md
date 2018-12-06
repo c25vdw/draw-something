@@ -31,3 +31,4 @@ This is a draw-something game running on LAN, built using pygame and socket(TCP)
 
 ---
 this project is a team of two project, done for University of Alberta CMPUT274 final project.
+For a detailed running instruction, please refer to README
