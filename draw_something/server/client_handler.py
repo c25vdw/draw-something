@@ -16,9 +16,11 @@ class ClientHandlerG(threading.Thread):
 
     def __init__(self, client_sock, player_id, event_hub):
         threading.Thread.__init__(self, name="client handler")
+        self.daemon = True
         self.sock = client_sock
         self.player_id = player_id
         self.eh = event_hub
+        self.should_stop = False
 
     def check_client_answer(self, client_answer):
         if self.eh.compare_then_update_answer(client_answer, self.player_id):
@@ -44,12 +46,21 @@ class ClientHandlerG(threading.Thread):
 
     def wait_for_eh_snap(self):
         # receive from client update
-        eh_snap_raw = self.sock.recv(self.BUFFER_SIZE)
+        try:
+            eh_snap_raw = self.sock.recv(self.BUFFER_SIZE)
+        except ConnectionResetError:
+            self.ends_and_wait_for_gameserver_ends()
         eh_snap = eh_snap_raw.decode()
         # eh_snap = get_first_json_string(eh_snap)
-        eh_snap = json.loads(eh_snap)
-
+        try:
+            eh_snap = json.loads(eh_snap)
+        except json.decoder.JSONDecodeError:
+            self.ends_and_wait_for_gameserver_ends()
         return eh_snap
+
+    def ends_and_wait_for_gameserver_ends(self):
+        self.should_stop = True
+        sleep(1000)
 
     def run(self):
         # send player id: either 1 or 2, then connection should start

@@ -21,6 +21,7 @@ class GameServerG:
         self.level = self.get_level(default=2)
         print("level is: ", self.level)
         self.ch_list = []
+        self.all_disconnected = False
         self.eh = EventHub()
 
         self.init_sock_for_setup()
@@ -105,6 +106,16 @@ class GameServerG:
         for ch in self.ch_list:
             ch.start()
 
-        while True:
-            sleep(1000)  # stand by so the client handler threads don't die.
+        while not self.all_disconnected:
+            sleep(1)
+            self.check_client_connections()
+            # stand by so the client handler threads don't die.
         return
+
+    def check_client_connections(self):
+        # check if all clients are disconnected with the server.
+        self.all_disconnected = True
+        for client in self.ch_list:
+            if not client.should_stop:
+                self.all_disconnected = False
+                break
