@@ -27,6 +27,7 @@ class EventHub:
         self.answer = ""
         self.end_game = False 
         self.prev_upload_id = self.drawer_id
+        self.winner = []
 
         # NOTICE: more attributes might be implicitely inserted by game server or client handler. like answer_stream or so.
 
@@ -47,6 +48,7 @@ class EventHub:
             "count_down": self.count_down,
             "ticking":self.ticking,
             "end_game":self.end_game,
+            "winner": self.winner,
         })
 
     def flush_input_to_client_answer(self, player_id):
@@ -77,4 +79,3 @@ class EventHub:
         elif (self.cur_ans_index == len(self.selected_entry) - 1):
             self.end_game = True
             self.answer = None
-            self.client_answer[str(player_id)] = ""

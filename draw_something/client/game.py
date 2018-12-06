@@ -191,7 +191,7 @@ class Game:
     def _draw_info_screen(self):
         # self.screen.fill(WHITE)
         # self.screen.blit(self.info_screen, (0, 0))
-        self.info_screen.draw(self.prev_answer)
+        self.info_screen.draw(self.prev_answer,self.svh.end_game,self.svh.winner)
 
     def _draw_info_bar(self):
         # drawing role

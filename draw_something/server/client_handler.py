@@ -67,6 +67,7 @@ class ClientHandlerG(threading.Thread):
         self.start_time = pygame.time.get_ticks()
         self.times_up = False
         self.toggle_tick = True
+        self.should_compute_winner = True
         while True:
             self.sock.sendall(self.eh.to_json().encode(
                 'utf-8'))  # send update to sh
@@ -107,6 +108,10 @@ class ClientHandlerG(threading.Thread):
                         print(self.eh.ticking)
                         self.toggle_tick = True
 
+            if self.player_id ==1 and self.eh.end_game and self.should_compute_winner:
+                self.compute_winner()
+                self.should_compute_winner = False
+
     def update_can_draw(self):
         self.canDraw = (self.eh.drawer_id == self.player_id)
 
@@ -119,3 +124,10 @@ class ClientHandlerG(threading.Thread):
             self.eh.color = eh_snap.get("color")
         else:
             self.eh.input_txt = eh_snap.get("input_txt")
+
+    def compute_winner(self):
+        score = self.eh.score
+        temp_winner = max(score, key=score.get)
+        for i in score:
+            if score[i] == score[temp_winner]:
+                self.eh.winner.append(i)
