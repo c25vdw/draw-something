@@ -45,14 +45,3 @@ class HuffmanHandler:
         tree = huffman.make_tree(freqs)
         data_stream.seek(0)
         util.compress(tree, data_stream, self.compressed_stream)
-
-
-if __name__ == "__main__":
-    hh = HuffmanHandler()
-    hh.get_entries()
-    # data_stream = io.BytesIO(bytes(data.encode('utf-8')))
-    # freqs = huffman.make_freq_table(data_stream)
-    # tree = huffman.make_tree(freqs)
-    # print(freqs, tree)
-    # data = "1 human;1 boat;2 dog;2 cat;3 reading;3 workout;"
-    # hh.save_and_compress_to_file(data)
