@@ -4,7 +4,7 @@ from client.settings import *
 
 class InfoScreen:
     def __init__(self, width, height,
-                 root_screen, server_handler,
+                 root_screen, server_handler, font_path,
                  timeout=5000):
         self.timeout = timeout
         self.svh = server_handler
@@ -14,77 +14,96 @@ class InfoScreen:
         self.height = height
 
         self.surface = pygame.Surface((width, height))
-        self.surface.fill(YELLOW_1)
+        self.surface.fill(YELLOW_2)
 
-        self.font = pygame.font.Font(None, 38)
-        self.answer_font = pygame.font.Font(None, 46)
-        self.answer_surface_size = (width, height // 3)
-        self.answer_surface = pygame.Surface((width // 1.5, height // 3))
-        self.answer_surface.fill(BLUE)
+        # fonts
+        self.font = pygame.font.Font(font_path, 32)
+        self.answer_font = pygame.font.Font(font_path, 32)
+        self.score_font = pygame.font.Font(font_path, 24)
+        self.winner_font = pygame.font.Font(font_path, 40)
 
-        self.winner_font = pygame.font.Font(None, 46)
-        self.winner_surface = pygame.Surface((width,300))       #need to position
-
-        self.score_surface_size = (width // 3, height // 2)
+        # surfaces
         self.score_surface = pygame.Surface((width // 3, height // 2))
-        self.score_surface.fill(SILVER)
 
-    def draw(self, answer, end_game, winner):  # answer is a cached answer variable done in Game
-        self._draw_answer(answer)
-        self._draw_score()
+    def fill_background(self, color):
+        self.surface.fill(color)
+        self.score_surface.fill(color)
+
+    def draw(self, answer, end_game, winner):
+        # answer is a cached answer variable done in Game
+        self.fill_background(YELLOW_2)
+
+        self.draw_answer(answer)
+        self.draw_score()
+        self.draw_winner(winner)
         if end_game:
-            self._draw_winner(winner)
-
-        self.surface.blit(self.answer_surface, (self.width // 3.5, 0))
-        self.surface.blit(self.score_surface,
-                          (self.width // 3, self.height // 3))
-
-        self.surface.blit(self.winner_surface,(0,0))        #need to position
-
+            self.draw_game_over()
         self.screen.blit(self.surface, (0, 0))
 
-    def _draw_answer(self, answer):
-        self.answer_surface.fill(YELLOW_1)
-
+    def draw_answer(self, answer):
+        # "dog"
         answer_txt_surface = self.answer_font.render(
-            "The answer was " + str(answer), True, BLACK)
-        self.answer_surface.blit(answer_txt_surface, (0, self.height // 6))
+            "\"" + str(answer) + "\"", True, BLACK)
 
-    def _draw_winner(self,winner):
-        self.winner_surface.fill(YELLOW_1)
+        width, height = answer_txt_surface.get_size()
+        self.surface.blit(answer_txt_surface, (self.get_middle_x(
+            answer_txt_surface, self.surface), self.height // 5))
 
+    def draw_winner(self, winner):
+        # "it's a tie!" or "p1 wins!"
         if len(winner) == 1:
-            winner_txt_surface = self.winner_font.render("The winner is P" + str(winner[0]), True, BLACK)
+            winner_txt_surface = self.winner_font.render(
+                "P" + str(winner[0]) + " wins!", True, BLACK)
         elif len(winner) > 1:
-            display_txt = "A tie between "
-            for i in range(0,len(winner) - 1):
-                display_txt += "P" + winner[i]
-                if len(winner) == 2:
-                    display_txt += " "
-                else:
-                    display_txt += ", " 
-            display_txt += "and P" + winner[-1]
-            winner_txt_surface = self.winner_font.render(display_txt, True, BLACK)
-        self.winner_surface.blit(winner_txt_surface, (0,0))         #need to position
+            winner_txt_surface = self.winner_font.render(
+                "It's a tie!", True, BLACK)
+        else:
+            winner_txt_surface = self.winner_font.render("", True, BLACK)
 
-    def _render_score_txt_surfaces(self):
+        middle_x = self.get_middle_x(winner_txt_surface, self.surface)
+        self.surface.blit(winner_txt_surface, (middle_x, 40))
+
+    def draw_game_over(self):
+        txt_surface = self.winner_font.render("game over", True, BLACK)
+
+        x = self.get_middle_x(txt_surface, self.surface)
+        self.surface.blit(txt_surface, (x, self.height - 200))
+
+    def draw_score(self):
+        '''
+             score
+            player1: 1
+            player2: 0
+            ...
+        '''
+        self.score_surface.fill(YELLOW_2)
+
+        score_lines = self.render_score_txt_surfaces()
+        LINEHEIGHT = 50
+        for i, text_surface in enumerate(score_lines):
+            self.score_surface.blit(text_surface, (self.get_middle_x(
+                text_surface, self.score_surface), i * LINEHEIGHT))
+
+        self.surface.blit(self.score_surface,
+                          (self.get_middle_x(self.score_surface, self.surface), self.height // 3))
+
+    def render_score_txt_surfaces(self):
+        # render score and the player scores as multiple lines rendered
         score_text_surfaces = []
 
-        title = self.font.render(
+        title = self.score_font.render(
             "Score", True, BLACK)
         score_text_surfaces.append(title)
 
         for key, val in self.svh.score.items():
-            line = self.font.render(
-                "Player {}: {}".format(key, val), True, BLACK)
+            line = self.score_font.render(
+                "Player{}: {}".format(key, val), True, BLACK)
             score_text_surfaces.append(line)
 
         return score_text_surfaces
 
-    def _draw_score(self):
-        self.score_surface.fill(YELLOW_1)
-
-        score_lines = self._render_score_txt_surfaces()
-        LINEHEIGHT = 50
-        for i, text_surface in enumerate(score_lines):
-            self.score_surface.blit(text_surface, (0, i * LINEHEIGHT))
+    def get_middle_x(self, surface, parent):
+        # get the x position that place surface in the middle of parent.
+        inner_w, inner_h = surface.get_size()
+        parent_w, parent_h = parent.get_size()
+        return (parent_w - inner_w) // 2
